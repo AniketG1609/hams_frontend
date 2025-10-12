@@ -1,0 +1,308 @@
+<div id="admin-dashboard" class="dashboard">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-md p-6 flex flex-col">
+      <div class="mb-8 border-b pb-4">
+        <div class="text-2xl font-bold text-blue-600 flex items-center gap-2">⚕ MediCare</div>
+      </div>
+      <ul class="flex flex-col gap-2">
+        <li>
+          <a
+            href="#"
+            class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 bg-blue-50 border-l-4 border-blue-600 rounded-l"
+            >📊 Dashboard</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:border-l-4 hover:border-blue-600 rounded-l"
+            >👨‍⚕️ Manage Doctors</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:border-l-4 hover:border-blue-600 rounded-l"
+            >👥 Manage Patients</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:border-l-4 hover:border-blue-600 rounded-l"
+            >📅 Appointments</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:border-l-4 hover:border-blue-600 rounded-l"
+            >📈 Analytics</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:border-l-4 hover:border-blue-600 rounded-l"
+            >💰 Payments</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:border-l-4 hover:border-blue-600 rounded-l"
+            >⚙️ System Settings</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="flex items-center gap-2 px-4 py-2 font-medium text-red-600 hover:bg-gray-100 hover:border-l-4 hover:border-red-600 rounded-l"
+            >🚪 Logout</a
+          >
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 bg-gray-100 overflow-y-auto">
+      <!-- Top Bar -->
+      <div class="flex justify-between items-center mb-8 bg-white p-4 rounded-lg shadow">
+        <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+        <div class="flex items-center gap-4">
+          <!-- Notifications -->
+          <div class="relative">
+            <button
+              onclick="toggleDropdown('admin-notifications')"
+              class="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center text-xl hover:bg-gray-200 transition"
+            >
+              🔔
+              <span
+                class="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white"
+                >5</span
+              >
+            </button>
+            <div
+              id="admin-notifications"
+              class="absolute right-0 mt-3 w-96 bg-white rounded-xl shadow-lg hidden max-h-96 overflow-y-auto z-50"
+            >
+              <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="font-semibold text-gray-800">Notifications</h3>
+                <button class="text-blue-600 text-sm font-medium">Mark all as read</button>
+              </div>
+              <div class="divide-y divide-gray-200">
+                <div class="p-4 bg-blue-50">
+                  <h4 class="font-semibold text-gray-800">New Doctor Registration</h4>
+                  <p class="text-gray-600 text-sm">
+                    Dr. Michael Roberts submitted registration documents for verification
+                  </p>
+                  <span class="text-gray-400 text-xs">15 minutes ago</span>
+                </div>
+                <div class="p-4 bg-blue-50">
+                  <h4 class="font-semibold text-gray-800">System Alert</h4>
+                  <p class="text-gray-600 text-sm">
+                    Server load increased by 20% - monitor performance
+                  </p>
+                  <span class="text-gray-400 text-xs">1 hour ago</span>
+                </div>
+                <div class="p-4 bg-blue-50">
+                  <h4 class="font-semibold text-gray-800">Payment Processed</h4>
+                  <p class="text-gray-600 text-sm">
+                    Monthly subscription payment of $5,240 received
+                  </p>
+                  <span class="text-gray-400 text-xs">2 hours ago</span>
+                </div>
+                <div class="p-4">
+                  <h4 class="font-semibold text-gray-800">Profile Update Request</h4>
+                  <p class="text-gray-600 text-sm">
+                    Dr. Jennifer Lee requested profile update approval
+                  </p>
+                  <span class="text-gray-400 text-xs">3 hours ago</span>
+                </div>
+                <div class="p-4">
+                  <h4 class="font-semibold text-gray-800">Milestone Reached</h4>
+                  <p class="text-gray-600 text-sm">System reached 100 appointments today!</p>
+                  <span class="text-gray-400 text-xs">5 hours ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile -->
+          <div class="relative">
+            <div
+              onclick="toggleDropdown('admin-profile')"
+              class="flex items-center gap-3 bg-gray-100 p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
+            >
+              <div
+                class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold flex items-center justify-center"
+              >
+                AD
+              </div>
+              <div class="text-left">
+                <div class="font-semibold text-gray-800 text-sm">Admin User</div>
+                <div class="text-gray-500 text-xs">System Administrator</div>
+              </div>
+              <span class="text-gray-500 text-xs">▼</span>
+            </div>
+            <div
+              id="admin-profile"
+              class="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-lg hidden z-50"
+            >
+              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100">👤 My Profile</a>
+              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100"
+                >⚙️ System Settings</a
+              >
+              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100">📊 Reports</a>
+              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100">🔐 Security</a>
+              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100"
+                >❓ Help & Support</a
+              >
+              <a href="#" class="flex items-center gap-2 p-3 text-red-600 hover:bg-gray-100"
+                >🚪 Logout</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div
+          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:-translate-y-1 hover:shadow-lg transition"
+        >
+          <div>
+            <h3 class="text-gray-500 text-sm font-medium mb-1">Total Doctors</h3>
+            <p class="text-2xl font-bold text-gray-800">156</p>
+          </div>
+          <div class="text-3xl">👨‍⚕️</div>
+        </div>
+        <div
+          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:-translate-y-1 hover:shadow-lg transition"
+        >
+          <div>
+            <h3 class="text-gray-500 text-sm font-medium mb-1">Total Patients</h3>
+            <p class="text-2xl font-bold text-gray-800">3,247</p>
+          </div>
+          <div class="text-3xl">👥</div>
+        </div>
+        <div
+          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:-translate-y-1 hover:shadow-lg transition"
+        >
+          <div>
+            <h3 class="text-gray-500 text-sm font-medium mb-1">Today's Appointments</h3>
+            <p class="text-2xl font-bold text-gray-800">89</p>
+          </div>
+          <div class="text-3xl">📅</div>
+        </div>
+        <div
+          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:-translate-y-1 hover:shadow-lg transition"
+        >
+          <div>
+            <h3 class="text-gray-500 text-sm font-medium mb-1">Revenue (Month)</h3>
+            <p class="text-2xl font-bold text-gray-800">$45.2K</p>
+          </div>
+          <div class="text-3xl">💰</div>
+        </div>
+      </div>
+
+      <!-- System Overview -->
+      <div class="bg-white p-6 rounded-xl shadow mb-6">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+          <h2 class="text-lg font-semibold text-gray-800">System Overview</h2>
+          <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+            Generate Report
+          </button>
+        </div>
+        <div
+          class="h-72 flex items-center justify-center rounded-xl bg-gradient-to-br from-indigo-200 to-purple-200 text-gray-500 text-lg"
+        >
+          📊 Analytics Chart Area (Appointment Trends)
+        </div>
+      </div>
+
+      <!-- Recently Added Doctors -->
+      <div class="bg-white p-6 rounded-xl shadow mb-6">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+          <h2 class="text-lg font-semibold text-gray-800">Recently Added Doctors</h2>
+          <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+            Add New Doctor
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Name</th>
+                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Specialization</th>
+                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Patients</th>
+                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Rating</th>
+                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Status</th>
+                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-2 font-semibold">Dr. James Wilson</td>
+                <td class="px-4 py-2">Orthopedics</td>
+                <td class="px-4 py-2">45</td>
+                <td class="px-4 py-2">4.7 ⭐</td>
+                <td class="px-4 py-2">
+                  <span
+                    class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold"
+                    >Active</span
+                  >
+                </td>
+                <td class="px-4 py-2 flex gap-2">
+                  <button class="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">View</button>
+                  <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+                    Suspend
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-2 font-semibold">Dr. Lisa Anderson</td>
+                <td class="px-4 py-2">Pediatrics</td>
+                <td class="px-4 py-2">67</td>
+                <td class="px-4 py-2">4.9 ⭐</td>
+                <td class="px-4 py-2">
+                  <span
+                    class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold"
+                    >Active</span
+                  >
+                </td>
+                <td class="px-4 py-2 flex gap-2">
+                  <button class="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">View</button>
+                  <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+                    Suspend
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-2 font-semibold">Dr. Robert Chen</td>
+                <td class="px-4 py-2">Neurology</td>
+                <td class="px-4 py-2">32</td>
+                <td class="px-4 py-2">4.6 ⭐</td>
+                <td class="px-4 py-2">
+                  <span
+                    class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold"
+                    >Pending Verification</span
+                  >
+                </td>
+                <td class="px-4 py-2 flex gap-2">
+                  <button class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">
+                    Approve
+                  </button>
+                  <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+                    Reject
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

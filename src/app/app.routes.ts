@@ -8,6 +8,7 @@ import { Login } from './features/auth/login/login';
 import { Register } from './features/auth/register/register';
 import { AuthLayout } from './layouts/auth-layout/auth-layout';
 import { DoctorAppointments } from './features/doctor/doctor-appointments/doctor-appointments';
+import { AdminDashboard } from './features/admin/admin-dashboard/admin-dashboard';
 
 export const routes: Routes = [
   // Public routes (Landing, About, etc.)
@@ -35,8 +36,28 @@ export const routes: Routes = [
         path: 'appointments',
         component: DoctorAppointments,
       },
+      {
+        path: 'patients',
+        loadComponent: () =>
+          import('./features/doctor/patient-management/patient-management').then(
+            (m) => m.PatientManagement
+          ),
+      },
     ],
   },
+
+  // Admin Dashboard
+  {
+    path: 'admin',
+    component: DashboardLayout,
+    children: [
+      {
+        path: 'dashboard',
+        component: AdminDashboard,
+      },
+    ],
+  },
+
   //Auth routes (Login, Register, etc.)
   {
     path: 'auth',
@@ -51,5 +72,11 @@ export const routes: Routes = [
         component: Register,
       },
     ],
+  },
+  // Wildcard route for a 404 page (optional)
+  {
+    path: '**',
+    redirectTo: '',
+    pathMatch: 'full',
   },
 ];

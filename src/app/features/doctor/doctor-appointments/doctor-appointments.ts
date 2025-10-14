@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { Appointment } from '../../../models/appointment.model'; // adjust path as needed
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { Appointment } from '../../../models/appointment-interface';
 
 @Component({
   selector: 'app-doctor-appointments',
   templateUrl: './doctor-appointments.html',
-  imports: [FormsModule, CommonModule, HttpClientModule],
+  imports: [FormsModule, CommonModule, HttpClientModule, RouterLink],
 })
 export class DoctorAppointments implements OnInit {
   appointments: Appointment[] = [];

@@ -15,41 +15,41 @@
       <li>
         <a
           [routerLink]="['/doctor/appointments']"
-          class="flex items-center gap-3 px-6 py-3 font-medium text-blue-600 bg-blue-50 border-l-4 border-blue-600"
+          class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
           >📅 Appointments</a
         >
       </li>
       <li>
         <a
           [routerLink]="['/doctor/patients']"
-          class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
+          class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 bg-blue-50 border-l-4 border-blue-600 rounded-r-md"
           >👥 Patients</a
         >
       </li>
       <li>
         <a
-          routerLink="['/doctor/availability']"
+          [routerLink]="['/doctor/availability']"
           class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
           >⏰ Availability</a
         >
       </li>
       <li>
         <a
-          routerLink="['/doctor/prescriptions']"
+          [routerLink]="['/doctor/prescriptions']"
           class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
           >💊 Prescriptions</a
         >
       </li>
       <li>
         <a
-          routerLink="['/doctor/medical-records']"
+          [routerLink]="['/doctor/medical-records']"
           class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
           >📋 Medical Records</a
         >
       </li>
       <li>
         <a
-          routerLink="['/doctor/settings']"
+          [routerLink]="['/doctor/settings']"
           class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
           >⚙️ Settings</a
         >
@@ -148,14 +148,16 @@
       </div>
     </div>
 
-    <div *ngIf="currentView === 'grid'" class="patients-grid">
+    @if (currentView === 'grid') {
+    <div class="patients-grid">
       <div *ngIf="filteredPatients.length === 0" class="empty-state" style="grid-column: 1 / -1">
         <div class="empty-icon">👥</div>
         <h3>No patients found</h3>
         <p>Try adjusting your filters or search criteria</p>
       </div>
 
-      <div *ngFor="let patient of filteredPatients" class="patient-card">
+      @for (patient of filteredPatients; track $index) {
+      <div class="patient-card">
         <div class="patient-header">
           <div class="patient-avatar">{{ getInitials(patient.name) }}</div>
           <div class="patient-info">
@@ -192,9 +194,10 @@
           <button class="btn btn-secondary btn-sm" (click)="sendMessage(patient)">💬</button>
         </div>
       </div>
+      }
     </div>
-
-    <div *ngIf="currentView === 'list'" class="patients-table">
+    } @if (currentView === 'list') {
+    <div class="patients-table">
       <table>
         <thead>
           <tr>
@@ -208,7 +211,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngIf="filteredPatients.length === 0">
+          @if (filteredPatients.length === 0) {
+          <tr>
             <td colspan="7" style="text-align: center; padding: 3rem">
               <div class="empty-state">
                 <div class="empty-icon">👥</div>
@@ -217,8 +221,8 @@
               </div>
             </td>
           </tr>
-
-          <tr *ngFor="let patient of filteredPatients">
+          } @for (patient of filteredPatients; track $index) {
+          <tr>
             <td>
               <div class="patient-cell">
                 <div class="patient-avatar-sm">{{ getInitials(patient.name) }}</div>
@@ -242,13 +246,16 @@
               </div>
             </td>
           </tr>
+          }
         </tbody>
       </table>
     </div>
+    }
   </main>
 
   <div class="modal" [ngClass]="{ show: showProfileModal }" (click)="closeModal()">
-    <div *ngIf="selectedPatient" class="modal-content" (click)="$event.stopPropagation()">
+    @if (selectedPatient) {
+    <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2 class="modal-title">Patient Profile</h2>
         <button class="close-btn" (click)="closeModal()">×</button>
@@ -330,5 +337,6 @@
         </div>
       </div>
     </div>
+    }
   </div>
 </body>

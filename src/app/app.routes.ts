@@ -9,6 +9,9 @@ import { Register } from './features/auth/register/register';
 import { AuthLayout } from './layouts/auth-layout/auth-layout';
 import { DoctorAppointments } from './features/doctor/doctor-appointments/doctor-appointments';
 import { AdminDashboard } from './features/admin/admin-dashboard/admin-dashboard';
+import { PatientManagement } from './features/doctor/patient-management/patient-management';
+import { DoctorAvailability } from './features/doctor/doctor-availability/doctor-availability';
+import { PatientRegister } from './features/auth/register/patient-register/patient-register';
 
 export const routes: Routes = [
   // Public routes (Landing, About, etc.)
@@ -21,7 +24,13 @@ export const routes: Routes = [
   {
     path: 'patient',
     component: DashboardLayout,
-    children: [{ path: 'dashboard', component: PatientDashboard }],
+    children: [
+      { path: 'dashboard', component: PatientDashboard },
+      {
+        path: '**',
+        component: PatientDashboard,
+      },
+    ],
   },
   // Doctor Dashboard
   {
@@ -38,10 +47,11 @@ export const routes: Routes = [
       },
       {
         path: 'patients',
-        loadComponent: () =>
-          import('./features/doctor/patient-management/patient-management').then(
-            (m) => m.PatientManagement
-          ),
+        component: PatientManagement,
+      },
+      {
+        path: 'availability',
+        component: DoctorAvailability,
       },
     ],
   },
@@ -69,7 +79,7 @@ export const routes: Routes = [
       },
       {
         path: 'register',
-        component: Register,
+        component: PatientRegister,
       },
     ],
   },

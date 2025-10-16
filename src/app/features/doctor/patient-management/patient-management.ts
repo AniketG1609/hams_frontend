@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,7 +17,7 @@ import { Patient } from '../../../models/patient-interface';
 export class PatientManagement implements OnInit {
   // --- Data State ---
   // Inject the service in the constructor
-  constructor(private patientService: PatientService) {}
+  constructor(@Inject(PatientService) private patientService: PatientService) {}
 
   public filteredPatients: Patient[] = [];
   public currentView: 'grid' | 'list' = 'grid';

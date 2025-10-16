@@ -9,7 +9,7 @@ import { Patient } from '../../models/patient-interface'; // Assuming this inter
 })
 export class PatientService {
   // Spring Boot REST API Endpoint
-  private apiUrl = 'http://localhost:8080/api/patients';
+  private apiUrl = 'http://localhost:8080/api/patients/status';
 
   // BehaviorSubject holds and streams the current state of all patients
   private allPatientsSubject = new BehaviorSubject<Patient[]>([]);

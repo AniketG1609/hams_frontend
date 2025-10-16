@@ -7,6 +7,12 @@ export const environment = {
     login: '/auth/login',
   },
 
+  admin: {
+    doctorRegister: '/admin/create-user',
+    doctorLogin: '/auth/login',
+    adminLogin: '/auth/login',
+  },
+
   patient: {
     getAvailableDoctors: '/patients/doctors-availability',
     getMedicalRecords: '/patients/me/medical-records',

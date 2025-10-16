@@ -5,6 +5,8 @@ import { Router, RouterLink } from '@angular/router';
 import { PatientAuthService } from '../../../core/services/patient-auth.service';
 import { AuthPatientLogin } from '../../../models/auth-patient-interface';
 import { Observable } from 'rxjs';
+import { DoctorAuthService } from '../../../core/services/doctor-auth.service';
+import { AdminAuthService } from '../../../core/services/admin-auth.service';
 
 type LoginMode = 'patient' | 'doctor' | 'admin'; // Add other modes as needed
 
@@ -17,7 +19,9 @@ type LoginMode = 'patient' | 'doctor' | 'admin'; // Add other modes as needed
 })
 export class Login {
   private fb = inject(FormBuilder);
-  private authService = inject(PatientAuthService);
+  private patientAuthService = inject(PatientAuthService);
+  private doctorAuthService = inject(DoctorAuthService);
+  private adminAuthService = inject(AdminAuthService); // Replace with actual AdminAuthService when available
   private router = inject(Router);
 
   loginForm!: FormGroup;
@@ -57,26 +61,22 @@ export class Login {
       let redirectPath: string;
 
       if (this.loginMode === 'patient') {
-        loginObservable = this.authService.login(loginRequest);
+        loginObservable = this.patientAuthService.login(loginRequest);
         redirectPath = '/patient/dashboard';
       } else if (this.loginMode === 'doctor') {
-        // Implement doctor login logic here
-        // loginObservable = this.doctorAuthService.login(loginRequest);
-        // redirectPath = '/doctor/dashboard';
+        loginObservable = this.doctorAuthService.login(loginRequest);
+        redirectPath = '/doctor/dashboard';
       } else if (this.loginMode === 'admin') {
-        // Implement admin login logic here
-        // loginObservable = this.adminAuthService.login(loginRequest);
-        // redirectPath = '/admin/dashboard';
+        loginObservable = this.adminAuthService.login(loginRequest);
+        redirectPath = '/admin/dashboard';
       }
       loginObservable!.subscribe({
         next: () => {
           this.isLoading = false;
-          // Navigate to the role-specific dashboard
           this.router.navigate([redirectPath]);
         },
         error: (error) => {
           this.isLoading = false;
-          // Extract error message or use a generic fallback
           this.errorMessage =
             error?.error?.message ||
             `Login failed for ${this.loginMode}. Invalid credentials or network error.`;
@@ -89,13 +89,11 @@ export class Login {
   }
 
   isPatientMode: boolean = true;
-  loginMode: LoginMode = 'patient'; // Default mode
+  loginMode: LoginMode = 'patient';
 
   toggleLoginMode(mode: LoginMode): void {
     this.loginMode = mode;
-    // Clear state on mode switch for a fresh attempt
     this.errorMessage = '';
-    // Reset form to clear previous values and validation state
     this.loginForm.reset();
   }
 }

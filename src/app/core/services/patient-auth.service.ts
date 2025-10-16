@@ -15,18 +15,18 @@ export class PatientAuthService {
   private http = inject(HttpClient);
   private apiUrlForRegistration = environment.apiUrl + environment.auth.register;
   private apiUrlForLogin = environment.apiUrl + environment.auth.login;
-  private tokenKey = 'authToken';
+  private tokenKey = 'token';
   private patientKey = 'patientData';
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
 
-  register(registerRequest: AuthPatientRequest): Observable<AuthPatientResponse> {
+  register(registerRequest: AuthPatientRequest): Observable<any> {
     return this.http
       .post<AuthPatientResponse>(`${this.apiUrlForRegistration}`, registerRequest, {
         responseType: 'text' as 'json',
       })
       .pipe(
         tap((response) => {
-          this.setAuthData(response);
+          this.setRegisteredPatient(response);
           // this.isAuthenticatedSubject.next(true);
         })
       );
@@ -58,6 +58,11 @@ export class PatientAuthService {
 
   isAuthenticated$(): Observable<boolean> {
     return this.isAuthenticatedSubject.asObservable();
+  }
+
+  private setRegisteredPatient(data: AuthPatientResponse): void {
+    localStorage.setItem(this.patientKey, JSON.stringify(data));
+    this.isAuthenticatedSubject.next(true);
   }
 
   private setAuthData(response: AuthPatientResponse): void {

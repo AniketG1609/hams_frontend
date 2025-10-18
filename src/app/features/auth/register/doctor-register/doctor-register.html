@@ -1,0 +1,195 @@
+<h3 class="text-2xl font-bold text-gray-800 mb-2">Create Doctor Account</h3>
+<p class="text-gray-500 mb-6">Join MediCare to provide care for patients</p>
+
+<form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="space-y-4">
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Doctor Name</label>
+      <input
+        type="text"
+        formControlName="doctorName"
+        class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
+        placeholder="Enter your full name"
+      />
+      <p
+        *ngIf="f['doctorName'].invalid && f['doctorName'].touched"
+        class="text-red-500 text-sm mt-1"
+      >
+        Name is required (min 3 chars).
+      </p>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+      <input
+        type="email"
+        formControlName="email"
+        class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
+        placeholder="Enter your email"
+      />
+      @if (f['email'].invalid && f['email'].touched) {
+      <p class="text-red-500 text-sm mt-1">A valid email is required.</p>
+      }
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Qualification</label>
+      <input
+        type="text"
+        formControlName="qualification"
+        class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
+        placeholder="e.g., MD, MBBS, FRCS"
+      />
+      <p
+        *ngIf="f['qualification'].invalid && f['qualification'].touched"
+        class="text-red-500 text-sm mt-1"
+      >
+        Qualification is required.
+      </p>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
+      <input
+        type="text"
+        formControlName="specialization"
+        class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
+        placeholder="e.g., Cardiology, Pediatrics"
+      />
+      <p
+        *ngIf="f['specialization'].invalid && f['specialization'].touched"
+        class="text-red-500 text-sm mt-1"
+      >
+        Specialization is required.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
+      <input
+        type="number"
+        formControlName="yearOfExperience"
+        class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
+        placeholder="Enter experience in years"
+      />
+      <p
+        *ngIf="f['yearOfExperience'].invalid && f['yearOfExperience'].touched"
+        class="text-red-500 text-sm mt-1"
+      >
+        Experience (min 0) is required.
+      </p>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+      <input
+        type="tel"
+        formControlName="contactNumber"
+        class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
+        placeholder="Enter your phone number"
+      />
+      <p
+        *ngIf="f['contactNumber'].invalid && f['contactNumber'].touched"
+        class="text-red-500 text-sm mt-1"
+      >
+        A valid phone number is required.
+      </p>
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Clinic Address</label>
+    <input
+      type="text"
+      formControlName="clinicAddress"
+      class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
+      placeholder="Enter your clinic address"
+    />
+    <p
+      *ngIf="f['clinicAddress'].invalid && f['clinicAddress'].touched"
+      class="text-red-500 text-sm mt-1"
+    >
+      Clinic Address is required (min 10 characters).
+    </p>
+  </div>
+
+  <hr class="border-gray-200" />
+
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+    <input
+      type="text"
+      formControlName="username"
+      class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
+      placeholder="Choose a username"
+    />
+    <p *ngIf="f['username'].invalid && f['username'].touched" class="text-red-500 text-sm mt-1">
+      Username is required (min 3 characters).
+    </p>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+      <div class="relative">
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          formControlName="password"
+          class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
+          placeholder="Create a password"
+        />
+        <button
+          type="button"
+          (click)="togglePassword()"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+        >
+          {{ showPassword ? '🙈' : '👁️' }}
+        </button>
+      </div>
+      <p *ngIf="f['password'].invalid && f['password'].touched" class="text-red-500 text-sm mt-1">
+        Password is required (min 6 characters).
+      </p>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+      <div class="relative">
+        <input
+          [type]="showConfirm ? 'text' : 'password'"
+          formControlName="confirmPassword"
+          class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500"
+          placeholder="Confirm your password"
+        />
+        <button
+          type="button"
+          (click)="toggleConfirm()"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+        >
+          {{ showConfirm ? '🙈' : '👁️' }}
+        </button>
+      </div>
+      <p *ngIf="passwordMismatch" class="text-red-500 text-sm mt-1">Passwords do not match</p>
+    </div>
+  </div>
+
+  <p *ngIf="errorMessage" class="text-red-500 text-sm font-semibold text-center mt-2">
+    {{ errorMessage }}
+  </p>
+
+  <button
+    type="submit"
+    [disabled]="registerForm.invalid || isLoading"
+    class="w-full py-2 bg-gradient-to-tr from-indigo-500 to-purple-600 text-white rounded-lg font-semibold transition"
+    [ngClass]="{
+      'opacity-50 cursor-not-allowed': registerForm.invalid || isLoading,
+      'hover:opacity-90': !registerForm.invalid && !isLoading
+    }"
+  >
+    {{ isLoading ? 'Submitting Application...' : 'Apply for Registration' }}
+  </button>
+
+  <p class="text-center text-sm text-gray-600 mt-4">
+    Already have an account?
+    <a routerLink="/auth/login" class="text-indigo-600 font-semibold hover:underline">Login here</a>
+  </p>
+</form>

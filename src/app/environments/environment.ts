@@ -11,6 +11,9 @@ export const environment = {
     doctorRegister: '/admin/create-user',
     doctorLogin: '/auth/login',
     adminLogin: '/auth/login',
+    getAllDoctors: '/patients/all-doctors',
+    updateDoctor: '/admin/doctors/{doctorId}',
+    deleteDoctor: '/admin/doctors/{doctorId}',
   },
 
   patient: {

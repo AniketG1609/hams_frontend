@@ -1,8 +1,10 @@
-export interface Notification {
+export interface NotificationResponseDTO {
   id: number;
+  appointmentId: number;
+  recipientType: string;
+  recipientId: number;
   title: string;
   message: string;
-  time: string;
-  unread: boolean;
-  type: 'info' | 'warning' | 'success' | 'error';
+  createdAt: string;
+  read: boolean;
 }

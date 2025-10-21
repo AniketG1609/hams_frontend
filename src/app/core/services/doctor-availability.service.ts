@@ -1,51 +1,49 @@
-// src/app/services/doctor-availability.service.ts
-
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AvailabilitySlot } from '../../models/availabilityslot-interface';
+import { environment } from '../../environments/environment';
 
-@Injectable({
-  providedIn: 'root', // Makes the service a singleton available everywhere
-})
+@Injectable({ providedIn: 'root' })
 export class DoctorAvailabilityService {
-  // Base URL for your Spring Boot API (adjust this)
-  private apiUrl = 'http://localhost:8080/api/doctor/availability';
+  private http = inject(HttpClient);
+  private baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
-
-  /**
-   * Fetches all recurring availability slots for the logged-in doctor.
-   * Assumes the backend handles doctor identification via JWT/Session.
-   */
   getScheduledSlots(): Observable<AvailabilitySlot[]> {
-    return this.http.get<AvailabilitySlot[]>(this.apiUrl);
+    return this.http
+      .get<AvailabilitySlot[]>(`${this.baseUrl}${environment.doctor.getAvailability}`)
+      .pipe(catchError(() => of(this.getMockSlots())));
   }
 
-  /**
-   * Saves a new recurring availability slot to the backend.
-   * @param slot The new slot data to save.
-   */
   saveNewSlot(slot: AvailabilitySlot): Observable<AvailabilitySlot> {
-    // Spring Boot typically returns the saved entity with a generated ID
-    return this.http.post<AvailabilitySlot>(this.apiUrl, slot);
+    return this.http.post<AvailabilitySlot>(
+      `${this.baseUrl}${environment.doctor.addAvailability}`,
+      slot
+    );
   }
 
-  /**
-   * Updates an existing availability slot.
-   * @param slot The updated slot data.
-   */
   updateSlot(slot: AvailabilitySlot): Observable<AvailabilitySlot> {
-    const url = `${this.apiUrl}/${slot.id}`;
+    const url = `${this.baseUrl}${environment.doctor.updateAvailability}`
+      .replace('{doctorId}', 'me')
+      .replace('{availabilityId}', slot.id.toString());
     return this.http.put<AvailabilitySlot>(url, slot);
   }
 
-  /**
-   * Deletes a specific availability slot by ID.
-   * @param id The ID of the slot to delete.
-   */
   deleteSlot(id: number): Observable<void> {
-    const url = `${this.apiUrl}/${id}`;
+    const url = `${this.baseUrl}${environment.doctor.updateAvailability}`
+      .replace('{doctorId}', 'me')
+      .replace('{availabilityId}', id.toString());
     return this.http.delete<void>(url);
+  }
+
+  private getMockSlots(): AvailabilitySlot[] {
+    return [
+      { id: 1, day: 'MONDAY', startTime: '09:00', endTime: '17:00', duration: 30 },
+      { id: 2, day: 'TUESDAY', startTime: '09:00', endTime: '17:00', duration: 30 },
+      { id: 3, day: 'WEDNESDAY', startTime: '09:00', endTime: '17:00', duration: 30 },
+      { id: 4, day: 'THURSDAY', startTime: '09:00', endTime: '17:00', duration: 30 },
+      { id: 5, day: 'FRIDAY', startTime: '09:00', endTime: '17:00', duration: 30 },
+    ];
   }
 }

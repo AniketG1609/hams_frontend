@@ -56,6 +56,14 @@
             >⚙️ Settings</a
           >
         </li>
+        <li>
+          <button
+            (click)="logout()"
+            class="flex items-center gap-2 px-4 py-2 font-medium text-red-600 hover:bg-gray-100 hover:border-l-4 hover:border-red-600 rounded-l w-full text-left"
+          >
+            🚪 Logout
+          </button>
+        </li>
       </ul>
     </aside>
 
@@ -63,7 +71,9 @@
     <main class="flex-1 p-6 overflow-y-auto">
       <!-- Header -->
       <div class="flex justify-between items-center mb-8 bg-white p-4 rounded-lg shadow">
-        <h1 class="text-2xl font-bold text-gray-800">Welcome back, Dr. Smith</h1>
+        <h1 class="text-2xl font-bold text-gray-800">
+          Welcome back, Dr. {{ doctorProfile?.doctorName || 'Doctor' }}
+        </h1>
         <div class="flex items-center gap-4">
           <!-- Notification -->
           <div class="relative">
@@ -112,38 +122,39 @@
           </div>
 
           <!-- Profile -->
-          <div class="relative">
-            <div
-              onclick="toggleProfile('doctor')"
+          <div>
+            <a
+              [routerLink]="['/doctor/profile']"
               class="flex items-center gap-3 bg-gray-100 p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
             >
               <div
                 class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold flex items-center justify-center"
               >
-                DS
+                {{ doctorInitials }}
               </div>
               <div class="text-left">
-                <div class="font-semibold text-gray-800 text-sm">Dr. John Smith</div>
-                <div class="text-gray-500 text-xs">Cardiologist</div>
+                <div class="font-semibold text-gray-800 text-sm">
+                  Dr. {{ doctorProfile?.doctorName }}
+                </div>
+                <div class="text-gray-500 text-xs">{{ doctorProfile?.specialization }}</div>
               </div>
               <span class="text-gray-500 text-xs">▼</span>
-            </div>
+            </a>
+
             <div
               id="doctor-profile"
               class="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-lg hidden z-50"
             >
-              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100">👤 My Profile</a>
-              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100">⚙️ Settings</a>
-              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100">💳 Billing</a>
-              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100"
-                >❓ Help & Support</a
+              <a
+                [routerLink]="['/doctor/profile']"
+                class="flex items-center gap-2 p-3 hover:bg-gray-100"
+                >👤 My Profile</a
               >
-              <button
-                (click)="logout()"
-                class="flex items-center gap-2 p-3 text-red-600 hover:bg-gray-100"
+              <a
+                [routerLink]="['/doctor/settings']"
+                class="flex items-center gap-2 p-3 hover:bg-gray-100"
+                >⚙️ Settings</a
               >
-                🚪 Logout
-              </button>
             </div>
           </div>
         </div>
@@ -156,7 +167,7 @@
         >
           <div>
             <h3 class="text-gray-500 text-sm font-medium mb-1">Today's Appointments</h3>
-            <p class="text-2xl font-bold text-gray-800">8</p>
+            <p class="text-2xl font-bold text-gray-800">{{ AppointmentCount }}</p>
           </div>
           <div class="text-3xl">📅</div>
         </div>
@@ -165,7 +176,7 @@
         >
           <div>
             <h3 class="text-gray-500 text-sm font-medium mb-1">Total Patients</h3>
-            <p class="text-2xl font-bold text-gray-800">247</p>
+            <p class="text-2xl font-bold text-gray-800">{{ totalPatientCount }}</p>
           </div>
           <div class="text-3xl">👥</div>
         </div>
@@ -174,7 +185,7 @@
         >
           <div>
             <h3 class="text-gray-500 text-sm font-medium mb-1">Pending Reviews</h3>
-            <p class="text-2xl font-bold text-gray-800">12</p>
+            <p class="text-2xl font-bold text-gray-800">{{ pendingReviewsCount }}</p>
           </div>
           <div class="text-3xl">📝</div>
         </div>
@@ -189,39 +200,6 @@
         </div>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="bg-white p-6 rounded-xl shadow mb-6">
-        <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
-          <h2 class="text-lg font-semibold text-gray-800">Quick Actions</h2>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <div
-            class="bg-white border-2 border-gray-200 p-6 rounded-lg text-center hover:border-blue-600 hover:shadow-lg transition cursor-pointer"
-          >
-            <div class="text-3xl mb-2">⏰</div>
-            <div class="font-semibold text-gray-800">Set Availability</div>
-          </div>
-          <div
-            class="bg-white border-2 border-gray-200 p-6 rounded-lg text-center hover:border-blue-600 hover:shadow-lg transition cursor-pointer"
-          >
-            <div class="text-3xl mb-2">💊</div>
-            <div class="font-semibold text-gray-800">Write Prescription</div>
-          </div>
-          <div
-            class="bg-white border-2 border-gray-200 p-6 rounded-lg text-center hover:border-blue-600 hover:shadow-lg transition cursor-pointer"
-          >
-            <div class="text-3xl mb-2">📄</div>
-            <div class="font-semibold text-gray-800">View Reports</div>
-          </div>
-          <div
-            class="bg-white border-2 border-gray-200 p-6 rounded-lg text-center hover:border-blue-600 hover:shadow-lg transition cursor-pointer"
-          >
-            <div class="text-3xl mb-2">📊</div>
-            <div class="font-semibold text-gray-800">Analytics</div>
-          </div>
-        </div>
-      </div>
-
       <!-- Today's Appointments Section -->
       <div class="bg-white p-6 rounded-xl shadow mb-6">
         <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
@@ -231,41 +209,40 @@
           </button>
         </div>
 
-        <!-- Appointment Card 1 -->
+        <!-- Dynamic Appointment Cards -->
+        @for (appointment of todayAppointments; track appointment.appointmentId) {
         <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded mb-4">
           <div class="flex justify-between items-start">
             <div>
-              <div class="font-semibold text-gray-800 text-lg">Sarah Johnson</div>
-              <div class="text-gray-500 text-sm mt-1">🕐 9:00 AM - Regular Checkup</div>
+              <div class="font-semibold text-gray-800 text-lg">{{ appointment.patient.name }}</div>
+              <div class="text-gray-500 text-sm mt-1">
+                🕐 {{ appointment.startTime }} - {{ appointment.endTime }} -
+                {{ appointment.reason }}
+              </div>
             </div>
-            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-              Confirmed
-            </span>
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-              Start Consultation
-            </button>
-            <button
-              class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
+            <span
+              [ngClass]="{
+                'bg-green-100 text-green-800': appointment.status === 'COMPLETED',
+                'bg-blue-100 text-blue-800': appointment.status === 'CONFIRMED',
+                'bg-yellow-100 text-yellow-800': appointment.status === 'PENDING'
+              }"
+              class="px-3 py-1 rounded-full text-sm font-semibold"
             >
-              View Records
-            </button>
-          </div>
-        </div>
-
-        <!-- Appointment Card 2 -->
-        <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded mb-4">
-          <div class="flex justify-between items-start">
-            <div>
-              <div class="font-semibold text-gray-800 text-lg">Michael Brown</div>
-              <div class="text-gray-500 text-sm mt-1">🕐 10:30 AM - Follow-up Visit</div>
-            </div>
-            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-              Upcoming
+              {{
+                appointment.status === 'COMPLETED'
+                  ? 'Completed'
+                  : appointment.status === 'CONFIRMED'
+                  ? 'Upcoming'
+                  : 'Pending'
+              }}
             </span>
           </div>
           <div class="flex gap-2 mt-4">
+            @if (appointment.status === 'COMPLETED') {
+            <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+              Add Prescription
+            </button>
+            } @if (appointment.status === 'CONFIRMED') {
             <button
               class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
             >
@@ -276,31 +253,33 @@
             >
               Reschedule
             </button>
-          </div>
-        </div>
-
-        <!-- Appointment Card 3 -->
-        <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded mb-4">
-          <div class="flex justify-between items-start">
-            <div>
-              <div class="font-semibold text-gray-800 text-lg">Emma Wilson</div>
-              <div class="text-gray-500 text-sm mt-1">🕐 2:00 PM - New Patient</div>
-            </div>
-            <span
-              class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold"
+            } @if (appointment.status === 'PENDING') {
+            <button
+              (click)="confirmAppointment(appointment.appointmentId)"
+              class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
             >
-              Pending
-            </span>
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
               Accept
             </button>
-            <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+            <button
+              (click)="rejectAppointment(appointment.appointmentId)"
+              class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+            >
               Decline
+            </button>
+            }
+            <button
+              class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
+            >
+              View Records
             </button>
           </div>
         </div>
+        }
+
+        <!-- No Appointments Message -->
+        @if (todayAppointments.length === 0) {
+        <div class="text-center text-gray-500 py-8">No appointments scheduled for today.</div>
+        }
       </div>
 
       <!-- Recent Prescriptions Section
@@ -313,7 +292,7 @@
             >View All</a
           >
         </div>
-
+ 
         <div class="overflow-x-auto">
           <table class="w-full table-auto border-collapse">
             <thead class="bg-gray-100">

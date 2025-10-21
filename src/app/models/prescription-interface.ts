@@ -19,7 +19,7 @@ export interface Prescription {
 
 // Minimal patient model for the dropdown
 export interface Patient {
-  id: number;
+  patientId: number;
   name: string;
   age: number;
 }

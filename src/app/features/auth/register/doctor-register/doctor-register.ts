@@ -1,4 +1,5 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+// doctor-register.component.ts
+import { Component, inject, input, output, EventEmitter, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -10,17 +11,17 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DoctorAuthService } from '../../../../core/services/doctor-auth.service';
 import { AuthDoctorRequest } from '../../../../models/auth-doctor-interface';
+import { AdminService } from '../../../../core/services/admin.service';
 
 @Component({
   selector: 'app-doctor-register',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, RouterLink],
   templateUrl: './doctor-register.html',
-  //   styleUrl: './doctor-register.css',
 })
-export class DoctorRegister {
+export class DoctorRegister implements OnInit {
   private fb = inject(FormBuilder);
-  private authService = inject(DoctorAuthService);
+  private authService = inject(AdminService);
   private router = inject(Router);
 
   // Inputs and Outputs
@@ -35,8 +36,32 @@ export class DoctorRegister {
   showPassword = false;
   showConfirm = false;
 
+  // Default specializations in case input is not provided
+  defaultSpecializations: string[] = [
+    'Cardiology',
+    'Dermatology',
+    'Orthopedics',
+    'Pediatrics',
+    'Neurology',
+    'Psychiatry',
+    'Dentistry',
+    'Ophthalmology',
+    'Gynecology',
+    'General Surgery',
+    'Internal Medicine',
+    'Emergency Medicine',
+  ];
+
   constructor() {
     this.registerForm = this.createForm();
+  }
+
+  ngOnInit() {
+    // Initialize with default specializations if none provided
+    if (!this.specializations() || this.specializations().length === 0) {
+      // We can't directly assign to input(), so we'll handle this in the template
+      console.log('Using default specializations');
+    }
   }
 
   // Custom Validator for Password Match
@@ -82,12 +107,22 @@ export class DoctorRegister {
     return this.registerForm.controls;
   }
 
+  // Get the actual specializations to use (input or defaults)
+  get availableSpecializations(): string[] {
+    const inputSpecs = this.specializations();
+    return inputSpecs && inputSpecs.length > 0 ? inputSpecs : this.defaultSpecializations;
+  }
+
   togglePassword() {
     this.showPassword = !this.showPassword;
   }
 
   toggleConfirm() {
     this.showConfirm = !this.showConfirm;
+  }
+
+  closeModal() {
+    this.close.emit();
   }
 
   onRegister(): void {
@@ -104,24 +139,45 @@ export class DoctorRegister {
         qualification: this.registerForm.get('qualification')?.value,
         specialization: this.registerForm.get('specialization')?.value,
         clinicAddress: this.registerForm.get('clinicAddress')?.value,
-        yearOfExperience: +this.registerForm.get('yearOfExperience')?.value, // Ensure number type
+        yearOfExperience: +this.registerForm.get('yearOfExperience')?.value,
       };
 
-      this.authService.register(registerRequest).subscribe({
-        next: () => {
+      console.log('Creating doctor with admin token...', registerRequest);
+
+      this.authService.createDoctor(registerRequest).subscribe({
+        next: (response) => {
           this.isLoading = false;
-          // After successful registration, redirect to login for initial sign-in
-          this.router.navigate(['/auth/login']);
+          console.log('Doctor created successfully:', response);
+          this.doctorCreated.emit();
+          this.registerForm.reset();
+          this.closeModal();
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage =
-            error.error?.message || 'Doctor registration failed. Please try again.';
-          console.error('Doctor registration error:', error);
+          this.handleRegistrationError(error);
         },
       });
     } else {
       this.registerForm.markAllAsTouched();
+    }
+  }
+  private handleRegistrationError(error: any): void {
+    console.error('Doctor registration error:', error);
+
+    if (error.status === 403) {
+      this.errorMessage = 'Access denied. Admin privileges required to create doctor accounts.';
+    } else if (error.status === 401) {
+      this.errorMessage = 'Admin session expired. Please log in again.';
+    } else if (error.status === 400) {
+      this.errorMessage =
+        error.error?.message || 'Invalid data provided. Please check your inputs.';
+    } else if (error.status === 409) {
+      this.errorMessage = 'A doctor with this email or username already exists.';
+    } else if (error.status === 0) {
+      this.errorMessage = 'Network error. Please check your connection and try again.';
+    } else {
+      this.errorMessage =
+        error.error?.message || 'Doctor registration failed. Please try again later.';
     }
   }
 }

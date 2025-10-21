@@ -1,356 +1,145 @@
-<!-- PATIENT DASHBOARD -->
-<div id="patient-dashboard" class="dashboard active">
-  <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white shadow-md p-8">
-      <div class="mb-8 border-b border-gray-200 pb-4">
-        <div class="text-2xl font-bold text-blue-600 flex items-center gap-2">⚕ MediCare</div>
+<div class="flex min-h-screen">
+  <app-sidebar></app-sidebar>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8 bg-gray-100 overflow-y-auto">
+    <app-header [patient]="patient" [notificationCount]="stats.notifications"></app-header>
+
+    <!-- Stats Cards -->
+    <div class="grid gap-6 mb-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:shadow-lg transition"
+      >
+        <div>
+          <h3 class="text-sm text-gray-500 font-medium mb-1">Upcoming Appointments</h3>
+          <p class="text-2xl font-bold text-gray-800">{{ stats.upcomingAppointments }}</p>
+        </div>
+        <div class="text-3xl">📅</div>
       </div>
-      <ul class="space-y-2">
-        <li>
-          <a
-            [routerLink]="['/patient/dashboard']"
-            class="flex items-center gap-2 p-3 text-gray-700 font-medium rounded border-l-4 border-blue-600 bg-blue-50"
-            >📊 Dashboard</a
+      <div
+        class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:shadow-lg transition"
+      >
+        <div>
+          <h3 class="text-sm text-gray-500 font-medium mb-1">Active Prescriptions</h3>
+          <p class="text-2xl font-bold text-gray-800">{{ stats.activePrescriptions }}</p>
+        </div>
+        <div class="text-3xl">💊</div>
+      </div>
+      <div
+        class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:shadow-lg transition"
+      >
+        <div>
+          <h3 class="text-sm text-gray-500 font-medium mb-1">Medical Records</h3>
+          <p class="text-2xl font-bold text-gray-800">{{ stats.medicalRecords }}</p>
+        </div>
+        <div class="text-3xl">📋</div>
+      </div>
+      <div
+        class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:shadow-lg transition"
+      >
+        <div>
+          <h3 class="text-sm text-gray-500 font-medium mb-1">Notifications</h3>
+          <p class="text-2xl font-bold text-gray-800">{{ stats.notifications }}</p>
+        </div>
+        <div class="text-3xl">🔔</div>
+      </div>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="bg-white p-6 rounded-xl shadow mb-6">
+      <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+        <h2 class="text-lg font-semibold text-gray-800">Upcoming Appointments</h2>
+        <button
+          (click)="navigateToFindDoctors()"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 transition"
+        >
+          Book New
+        </button>
+      </div>
+
+      @for (appointment of upcomingAppointments; track appointment.appointmentId) {
+      <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded mb-4">
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <div class="font-semibold text-gray-800 text-lg">
+              Dr. {{ appointment.doctor.doctorName }} - {{ appointment.doctor.specialization }}
+            </div>
+            <div class="text-gray-500 text-sm mt-1">
+              🕐 {{ appointment.appointmentDate | date : 'mediumDate' }},
+              {{ appointment.startTime }}
+            </div>
+          </div>
+          <span
+            [class]="
+              getStatusBadgeClass(appointment.status) +
+              ' px-3 py-1 rounded-full text-sm font-semibold'
+            "
           >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="flex items-center gap-2 p-3 text-gray-700 font-medium rounded hover:bg-gray-100"
-            >📅 My Appointments</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="flex items-center gap-2 p-3 text-gray-700 font-medium rounded hover:bg-gray-100"
-            >🔍 Find Doctors</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="flex items-center gap-2 p-3 text-gray-700 font-medium rounded hover:bg-gray-100"
-            >📋 Medical Records</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="flex items-center gap-2 p-3 text-gray-700 font-medium rounded hover:bg-gray-100"
-            >💊 Prescriptions</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="flex items-center gap-2 p-3 text-gray-700 font-medium rounded hover:bg-gray-100"
-            >🔔 Notifications</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="flex items-center gap-2 p-3 text-gray-700 font-medium rounded hover:bg-gray-100"
-            >⚙️ Settings</a
-          >
-        </li>
-        <li>
-          <button
-            (click)="logout()"
-            class="flex items-center gap-2 p-3 text-gray-700 font-medium rounded hover:bg-gray-100"
-          >
-            🚪 Logout
+            {{ appointment.status }}
+          </span>
+        </div>
+        <div class="flex gap-2 mt-4">
+          <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition">
+            View Details
           </button>
-        </li>
-      </ul>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="flex-1 p-8 bg-gray-100 overflow-y-auto">
-      <!-- Patient Header -->
-      <div class="flex justify-between items-center mb-8 bg-white p-4 rounded-lg shadow">
-        <h1 class="text-2xl font-bold text-gray-800">Hello, Emily</h1>
-
-        <div class="flex items-center gap-4">
-          <!-- Notification -->
-          <div class="relative">
-            <button
-              onclick="toggleNotifications('patient')"
-              class="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center text-xl hover:bg-gray-200 transition"
-            >
-              🔔
-              <span
-                class="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white"
-                >2</span
-              >
-            </button>
-
-            <!-- Notification Dropdown -->
-            <div
-              id="patient-notifications"
-              class="absolute right-0 mt-3 w-96 bg-white rounded-xl shadow-lg hidden max-h-96 overflow-y-auto z-50"
-            >
-              <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="font-semibold text-gray-800">Notifications</h3>
-                <button class="text-blue-600 text-sm font-medium">Mark all as read</button>
-              </div>
-              <div class="divide-y divide-gray-200">
-                <div class="p-4 bg-blue-50">
-                  <h4 class="font-semibold text-gray-800">Appointment Confirmed</h4>
-                  <p class="text-gray-600 text-sm">
-                    Dr. John Smith confirmed your appointment for tomorrow at 10:00 AM
-                  </p>
-                  <span class="text-gray-400 text-xs">10 minutes ago</span>
-                </div>
-                <div class="p-4 bg-blue-50">
-                  <h4 class="font-semibold text-gray-800">Prescription Ready</h4>
-                  <p class="text-gray-600 text-sm">
-                    Your prescription from Dr. Smith is now available for download
-                  </p>
-                  <span class="text-gray-400 text-xs">2 hours ago</span>
-                </div>
-                <div class="p-4">
-                  <h4 class="font-semibold text-gray-800">Appointment Reminder</h4>
-                  <p class="text-gray-600 text-sm">
-                    Your appointment with Dr. Williams is tomorrow at 2:00 PM
-                  </p>
-                  <span class="text-gray-400 text-xs">Yesterday</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Profile -->
-          <div class="relative">
-            <div
-              onclick="toggleProfile('patient')"
-              class="flex items-center gap-3 bg-gray-100 p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
-            >
-              <div
-                class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold flex items-center justify-center"
-              >
-                EJ
-              </div>
-              <div class="text-left">
-                <div class="font-semibold text-gray-800 text-sm">Emily Johnson</div>
-                <div class="text-gray-500 text-xs">Patient ID: P12345</div>
-              </div>
-              <span class="text-gray-500 text-xs">▼</span>
-            </div>
-
-            <!-- Profile Dropdown -->
-            <div
-              id="patient-profile"
-              class="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-lg hidden z-50"
-            >
-              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100">👤 My Profile</a>
-              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100">⚙️ Settings</a>
-              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100">💳 Billing</a>
-              <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100"
-                >❓ Help & Support</a
-              >
-              <a href="#" class="flex items-center gap-2 p-3 text-red-600 hover:bg-gray-100"
-                >🚪 Logout</a
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Stats Cards -->
-      <div class="grid gap-6 mb-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <div
-          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:shadow-lg transition"
-        >
-          <div>
-            <h3 class="text-sm text-gray-500 font-medium mb-1">Upcoming Appointments</h3>
-            <p class="text-2xl font-bold text-gray-800">3</p>
-          </div>
-          <div class="text-3xl">📅</div>
-        </div>
-        <div
-          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:shadow-lg transition"
-        >
-          <div>
-            <h3 class="text-sm text-gray-500 font-medium mb-1">Active Prescriptions</h3>
-            <p class="text-2xl font-bold text-gray-800">2</p>
-          </div>
-          <div class="text-3xl">💊</div>
-        </div>
-        <div
-          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:shadow-lg transition"
-        >
-          <div>
-            <h3 class="text-sm text-gray-500 font-medium mb-1">Medical Records</h3>
-            <p class="text-2xl font-bold text-gray-800">15</p>
-          </div>
-          <div class="text-3xl">📋</div>
-        </div>
-        <div
-          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:shadow-lg transition"
-        >
-          <div>
-            <h3 class="text-sm text-gray-500 font-medium mb-1">Notifications</h3>
-            <p class="text-2xl font-bold text-gray-800">5</p>
-          </div>
-          <div class="text-3xl">🔔</div>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="bg-white p-6 rounded-xl shadow mb-6">
-        <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
-          <h2 class="text-lg font-semibold text-gray-800">Quick Actions</h2>
-        </div>
-        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-          <div
-            class="bg-white border-2 border-gray-200 p-6 rounded-lg text-center cursor-pointer hover:border-blue-600 hover:shadow-lg transition"
-          >
-            <div class="text-3xl mb-2">📅</div>
-            <div class="font-semibold text-gray-800">Book Appointment</div>
-          </div>
-          <div
-            class="bg-white border-2 border-gray-200 p-6 rounded-lg text-center cursor-pointer hover:border-blue-600 hover:shadow-lg transition"
-          >
-            <div class="text-3xl mb-2">🔍</div>
-            <div class="font-semibold text-gray-800">Find Doctors</div>
-          </div>
-          <div
-            class="bg-white border-2 border-gray-200 p-6 rounded-lg text-center cursor-pointer hover:border-blue-600 hover:shadow-lg transition"
-          >
-            <div class="text-3xl mb-2">📄</div>
-            <div class="font-semibold text-gray-800">Upload Records</div>
-          </div>
-          <div
-            class="bg-white border-2 border-gray-200 p-6 rounded-lg text-center cursor-pointer hover:border-blue-600 hover:shadow-lg transition"
-          >
-            <div class="text-3xl mb-2">💊</div>
-            <div class="font-semibold text-gray-800">Order Medicine</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Upcoming Appointments -->
-      <div class="bg-white p-6 rounded-xl shadow mb-6">
-        <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
-          <h2 class="text-lg font-semibold text-gray-800">Upcoming Appointments</h2>
-          <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 transition">
-            Book New
+          @if (appointment.status === 'PENDING' || appointment.status === 'CONFIRMED') {
+          <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+            Cancel
           </button>
-        </div>
-
-        <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded mb-4">
-          <div class="flex justify-between items-start mb-2">
-            <div>
-              <div class="font-semibold text-gray-800 text-lg">Dr. John Smith - Cardiology</div>
-              <div class="text-gray-500 text-sm mt-1">🕐 Tomorrow, 10:00 AM</div>
-            </div>
-            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold"
-              >Confirmed</span
-            >
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button
-              class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
-            >
-              View Details
-            </button>
-            <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
-              Cancel
-            </button>
-          </div>
-        </div>
-
-        <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded mb-4">
-          <div class="flex justify-between items-start mb-2">
-            <div>
-              <div class="font-semibold text-gray-800 text-lg">
-                Dr. Sarah Williams - Dermatology
-              </div>
-              <div class="text-gray-500 text-sm mt-1">🕐 Oct 15, 2:00 PM</div>
-            </div>
-            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold"
-              >Upcoming</span
-            >
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button
-              class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
-            >
-              View Details
-            </button>
-            <button
-              class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
-            >
-              Reschedule
-            </button>
-          </div>
+          }
         </div>
       </div>
+      } @if (upcomingAppointments.length === 0) {
+      <div class="text-center py-8 text-gray-500">No upcoming appointments</div>
+      }
+    </div>
 
-      <!-- Recent Prescriptions -->
-      <div class="bg-white p-6 rounded-xl shadow">
-        <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
-          <h2 class="text-lg font-semibold text-gray-800">Recent Prescriptions</h2>
-          <a
-            href="#"
-            class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
-            >View All</a
-          >
-        </div>
-
-        <table class="w-full border-collapse">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="p-4 text-left text-gray-700 font-semibold text-sm">Medicine</th>
-              <th class="p-4 text-left text-gray-700 font-semibold text-sm">Prescribed By</th>
-              <th class="p-4 text-left text-gray-700 font-semibold text-sm">Date</th>
-              <th class="p-4 text-left text-gray-700 font-semibold text-sm">Status</th>
-              <th class="p-4 text-left text-gray-700 font-semibold text-sm">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="hover:bg-gray-100">
-              <td class="p-4 font-semibold">Aspirin 100mg</td>
-              <td class="p-4">Dr. John Smith</td>
-              <td class="p-4">Oct 10, 2025</td>
-              <td class="p-4">
-                <span
-                  class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold"
-                  >Active</span
-                >
-              </td>
-              <td class="p-4">
-                <button
-                  class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
-                >
-                  Download
-                </button>
-              </td>
-            </tr>
-            <tr class="hover:bg-gray-100">
-              <td class="p-4 font-semibold">Lisinopril 10mg</td>
-              <td class="p-4">Dr. John Smith</td>
-              <td class="p-4">Oct 10, 2025</td>
-              <td class="p-4">
-                <span
-                  class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold"
-                  >Active</span
-                >
-              </td>
-              <td class="p-4">
-                <button
-                  class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
-                >
-                  Download
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Recent Prescriptions -->
+    <div class="bg-white p-6 rounded-xl shadow">
+      <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+        <h2 class="text-lg font-semibold text-gray-800">Recent Prescriptions</h2>
+        <a href="#" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
+          >View All</a
+        >
       </div>
-    </main>
-  </div>
+
+      @if (medicalRecords.length > 0) {
+      <table class="w-full border-collapse">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-4 text-left text-gray-700 font-semibold text-sm">Medicine</th>
+            <th class="p-4 text-left text-gray-700 font-semibold text-sm">Prescribed By</th>
+            <th class="p-4 text-left text-gray-700 font-semibold text-sm">Date</th>
+            <th class="p-4 text-left text-gray-700 font-semibold text-sm">Status</th>
+            <th class="p-4 text-left text-gray-700 font-semibold text-sm">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (record of medicalRecords.slice(0, 2); track record.recordId) { @for (prescription of
+          record.prescriptions; track prescription.prescriptionId) {
+          <tr class="hover:bg-gray-100">
+            <td class="p-4 font-semibold">{{ prescription.medicationName }}</td>
+            <td class="p-4">Dr. {{ record.doctorName }}</td>
+            <td class="p-4">{{ prescription.prescribedAt | date : 'mediumDate' }}</td>
+            <td class="p-4">
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold"
+                >Active</span
+              >
+            </td>
+            <td class="p-4">
+              <button
+                class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
+              >
+                Download
+              </button>
+            </td>
+          </tr>
+          } }
+        </tbody>
+      </table>
+      } @else {
+      <div class="text-center py-8 text-gray-500">No prescriptions available</div>
+      }
+    </div>
+  </main>
 </div>

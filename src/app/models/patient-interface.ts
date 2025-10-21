@@ -1,17 +1,20 @@
-import { MedicalRecord } from './medicalrecord-interface';
-
 export interface Patient {
-  id: number;
+  patientId: number;
   name: string;
-  age: number;
-  gender: 'Male' | 'Female' | 'Other';
-  phone: string;
   email: string;
-  bloodGroup: string;
+  contactNumber: string;
   address: string;
-  registrationDate: string;
-  lastVisit: string;
-  totalVisits: number;
-  activeTreatments: number;
-  medicalHistory: MedicalRecord[];
+  gender: string;
+  dateOfBirth: string;
+  bloodGroup: string;
+}
+
+export interface PatientDTO {
+  name: string;
+  dateOfBirth: string;
+  gender: string;
+  contactNumber: string;
+  email: string;
+  address: string;
+  bloodGroup: string;
 }

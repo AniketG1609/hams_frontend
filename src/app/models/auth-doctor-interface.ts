@@ -20,7 +20,7 @@ export interface AuthDoctorLogin {
 }
 
 export interface Doctor {
-  id: string;
+  id: number;
   name: string;
   email: string;
   phoneNumber: string;

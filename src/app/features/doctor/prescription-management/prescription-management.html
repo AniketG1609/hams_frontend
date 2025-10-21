@@ -160,8 +160,8 @@
             class="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           >
             <option value="" disabled>Search or Select a Patient</option>
-            <option *ngFor="let p of patientList" [ngValue]="p.id">
-              {{ p.name }} ({{ p.age }} years)
+            <option *ngFor="let p of patientList" [ngValue]="p.patientId">
+              {{ p.name }} ({{ p.dateOfBirth }})
             </option>
           </select>
         </div>

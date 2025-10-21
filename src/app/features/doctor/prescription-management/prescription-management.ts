@@ -4,7 +4,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Prescription, Medication, Patient } from '../../../models/prescription-interface'; // Adjust path
+import { Prescription, Medication } from '../../../models/prescription-interface';
+import { Patient } from '../../../models/patient-interface';
 import { DoctorPrescriptionService } from '../../../core/services/doctor-prescription.service';
 
 @Component({
@@ -77,16 +78,43 @@ export class DoctorPrescriptions implements OnInit {
 
   fetchPatientList(): void {
     this.prescriptionService.getPatientList().subscribe({
-      next: (data) => {
+      next: (data: Patient[]) => {
         this.patientList = data;
       },
       error: (err) => {
         console.error('Failed to fetch patient list:', err);
         // Fallback for development:
         this.patientList = [
-          { id: 1, name: 'Alice Johnson', age: 34 },
-          { id: 2, name: 'Bob Smith', age: 55 },
-          { id: 3, name: 'Charlie Doe', age: 21 },
+          {
+            patientId: 1,
+            name: 'Alice Johnson',
+            email: 'alice@email.com',
+            contactNumber: '+1-555-0101',
+            address: '123 Main St',
+            gender: 'Female',
+            dateOfBirth: '1989-03-15',
+            bloodGroup: 'O+',
+          },
+          {
+            patientId: 2,
+            name: 'Bob Smith',
+            email: 'bob@email.com',
+            contactNumber: '+1-555-0102',
+            address: '456 High St',
+            gender: 'Male',
+            dateOfBirth: '1985-07-22',
+            bloodGroup: 'A+',
+          },
+          {
+            patientId: 3,
+            name: 'Charlie Doe',
+            email: 'charlie@email.com',
+            contactNumber: '+1-555-0103',
+            address: '789 Lake Rd',
+            gender: 'Male',
+            dateOfBirth: '1992-11-05',
+            bloodGroup: 'B+',
+          },
         ];
       },
     });
@@ -136,7 +164,7 @@ export class DoctorPrescriptions implements OnInit {
     }
 
     // Assign patient name for display/backend use
-    const patient = this.patientList.find((p) => p.id === this.newPrescription.patientId);
+    const patient = this.patientList.find((p) => p.patientId === this.newPrescription.patientId);
     this.newPrescription.patientName = patient ? patient.name : 'Unknown Patient';
     this.newPrescription.date = new Date(); // Set current date
 

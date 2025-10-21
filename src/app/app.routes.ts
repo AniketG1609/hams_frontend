@@ -6,12 +6,6 @@ import { PublicLayout } from './layouts/public-layout/public-layout';
 import { DashboardLayout } from './layouts/dashboard-layout/dashboard-layout';
 import { AuthLayout } from './layouts/auth-layout/auth-layout';
 
-// Features (Lazy Loaded)
-// NOTE: We don't import the components directly here, as they are lazy loaded.
-// The imports below are for the files where the components are defined.
-// The `loadComponent` uses a dynamic import that resolves to the component class.
-// import { Landing } from './features/landing/landing'; // Example of what is NOT needed here
-
 export const routes: Routes = [
   // 1. Public routes (Landing Page)
   {
@@ -31,9 +25,6 @@ export const routes: Routes = [
   {
     path: 'auth',
     component: AuthLayout,
-    // CRITICAL FIX: Removed canActivate here. We don't want to block unauthenticated users from seeing the login page.
-    // The inner login/register components will use a separate guard (e.g., PublicGuard)
-    // if you want to redirect logged-in users away from the login page.
     children: [
       {
         path: 'login',
@@ -65,6 +56,26 @@ export const routes: Routes = [
             (m) => m.PatientDashboard
           ),
         title: 'Patient Dashboard',
+      },
+      {
+        path: 'my-appointments',
+        loadComponent: () =>
+          import('./features/patient/my-appointments/my-appointments').then(
+            (m) => m.MyAppointments
+          ),
+        title: 'My Appointments',
+      },
+      {
+        path: 'find-doctors',
+        loadComponent: () =>
+          import('./features/patient/find-doctor/find-doctor').then((m) => m.FindDoctorComponent),
+        title: 'Find Doctors',
+      },
+      {
+        path: 'medical-records',
+        loadComponent: () =>
+          import('./features/patient/medical-record/medical-record').then((m) => m.MedicalRecord),
+        title: 'Medical Records',
       },
       // Add other patient sub-routes here
     ],
@@ -108,6 +119,12 @@ export const routes: Routes = [
             (m) => m.DoctorAvailability
           ),
         title: 'Doctor Availability',
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/doctor/doctor-profile/doctor-profile').then((m) => m.DoctorProfile),
+        title: 'Doctor Profile',
       },
     ],
   },

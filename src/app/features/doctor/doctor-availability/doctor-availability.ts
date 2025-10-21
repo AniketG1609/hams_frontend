@@ -1,7 +1,5 @@
-// doctor-availability.component.ts (Updated)
-
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AvailabilitySlot } from '../../../models/availabilityslot-interface';
@@ -9,27 +7,25 @@ import { DoctorAvailabilityService } from '../../../core/services/doctor-availab
 
 @Component({
   selector: 'app-doctor-availability',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './doctor-availability.html',
   styleUrls: ['./doctor-availability.css'],
-  standalone: true, // You may need this depending on your setup
-  imports: [CommonModule, FormsModule, RouterLink],
 })
 export class DoctorAvailability implements OnInit {
   currentTab: 'slots' | 'add' = 'slots';
 
   daysOfWeek: string[] = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
+    'MONDAY',
+    'TUESDAY',
+    'WEDNESDAY',
+    'THURSDAY',
+    'FRIDAY',
+    'SATURDAY',
+    'SUNDAY',
   ];
 
-  // Initialize as empty array, data will be fetched in ngOnInit
   scheduledSlots: AvailabilitySlot[] = [];
-
   newSlot: Partial<AvailabilitySlot> = {
     day: '',
     startTime: '09:00',
@@ -37,46 +33,62 @@ export class DoctorAvailability implements OnInit {
     duration: 30,
   };
 
-  isEditMode: boolean = false; // To track if we are editing an existing slot
+  isEditMode = false;
+  editingSlotId: number | null = null;
 
-  // Inject the new service
   constructor(private availabilityService: DoctorAvailabilityService) {}
 
   ngOnInit(): void {
-    this.fetchScheduledSlots(); // Fetch data when the component initializes
+    this.fetchScheduledSlots();
   }
 
   fetchScheduledSlots(): void {
     this.availabilityService.getScheduledSlots().subscribe({
       next: (slots) => {
         this.scheduledSlots = slots;
-        console.log('Slots fetched:', slots);
       },
-      error: (err) => {
-        console.error('Failed to fetch availability slots:', err);
-        alert('Could not load availability. Please check the backend connection.');
-        // FALLBACK: Use dummy data if API fails during development
-        this.scheduledSlots = [
-          { id: 1, day: 'Monday', startTime: '09:00', endTime: '12:00', duration: 30 },
-          { id: 2, day: 'Tuesday', startTime: '14:00', endTime: '18:00', duration: 45 },
-          { id: 3, day: 'Thursday', startTime: '08:00', endTime: '16:00', duration: 60 },
-        ] as AvailabilitySlot[];
+      error: (error) => {
+        console.error('Failed to fetch availability slots:', error);
+        alert('Could not load availability. Please try again.');
       },
     });
   }
 
   switchTab(tab: 'slots' | 'add'): void {
     this.currentTab = tab;
-    // When switching to 'add' tab, reset the form unless we are already in edit mode
     if (tab === 'add' && !this.isEditMode) {
       this.resetForm();
     }
   }
 
-  // --- Form Logic ---
-
   saveNewSlot(): void {
-    // 1. Validation (Input sanitation and format checks should also be done)
+    if (!this.validateSlot()) return;
+
+    const slotData: AvailabilitySlot = {
+      ...this.newSlot,
+      duration: +this.newSlot.duration!,
+    } as AvailabilitySlot;
+
+    if (this.isEditMode && this.editingSlotId) {
+      this.availabilityService.updateSlot({ ...slotData, id: this.editingSlotId }).subscribe({
+        next: () => {
+          alert('Slot updated successfully!');
+          this.handleSuccessfulSubmission();
+        },
+        error: (error) => alert('Failed to update slot: ' + error.message),
+      });
+    } else {
+      this.availabilityService.saveNewSlot(slotData).subscribe({
+        next: () => {
+          alert('Availability slot added successfully!');
+          this.handleSuccessfulSubmission();
+        },
+        error: (error) => alert('Failed to save new slot: ' + error.message),
+      });
+    }
+  }
+
+  private validateSlot(): boolean {
     if (
       !this.newSlot.day ||
       !this.newSlot.startTime ||
@@ -84,38 +96,21 @@ export class DoctorAvailability implements OnInit {
       !this.newSlot.duration
     ) {
       alert('Please fill in all required fields.');
-      return;
+      return false;
     }
 
-    // Ensure duration is a number
-    const slotData: AvailabilitySlot = {
-      ...this.newSlot,
-      duration: +this.newSlot.duration!,
-    } as AvailabilitySlot;
-
-    // Determine whether to CREATE or UPDATE
-    if (this.isEditMode && slotData.id) {
-      this.availabilityService.updateSlot(slotData).subscribe({
-        next: (updatedSlot) => {
-          alert('Slot updated successfully!');
-          this.fetchScheduledSlots(); // Refresh the list
-          this.resetForm();
-          this.switchTab('slots');
-        },
-        error: (err) => alert('Failed to update slot. Error: ' + err.message),
-      });
-    } else {
-      // Create new slot
-      this.availabilityService.saveNewSlot(slotData).subscribe({
-        next: (createdSlot) => {
-          alert('Availability slot added successfully!');
-          this.fetchScheduledSlots(); // Refresh the list
-          this.resetForm();
-          this.switchTab('slots');
-        },
-        error: (err) => alert('Failed to save new slot. Error: ' + err.message),
-      });
+    if (this.newSlot.startTime >= this.newSlot.endTime) {
+      alert('End time must be after start time.');
+      return false;
     }
+
+    return true;
+  }
+
+  private handleSuccessfulSubmission(): void {
+    this.fetchScheduledSlots();
+    this.resetForm();
+    this.switchTab('slots');
   }
 
   resetForm(): void {
@@ -126,29 +121,38 @@ export class DoctorAvailability implements OnInit {
       duration: 30,
     };
     this.isEditMode = false;
+    this.editingSlotId = null;
   }
 
-  // --- Table/Slot Management Logic ---
-
   editSlot(slot: AvailabilitySlot): void {
-    this.newSlot = { ...slot }; // Load data into the form model
-    this.isEditMode = true; // Set edit flag
-    this.switchTab('add'); // Switch to the form tab
+    this.newSlot = { ...slot };
+    this.isEditMode = true;
+    this.editingSlotId = slot.id;
+    this.switchTab('add');
   }
 
   deleteSlot(id: number): void {
-    if (
-      confirm(
-        'Are you sure you want to delete this availability slot? This action cannot be undone.'
-      )
-    ) {
+    if (confirm('Are you sure you want to delete this availability slot?')) {
       this.availabilityService.deleteSlot(id).subscribe({
         next: () => {
-          alert('Slot deleted successfully!');
           this.scheduledSlots = this.scheduledSlots.filter((slot) => slot.id !== id);
+          alert('Slot deleted successfully!');
         },
-        error: (err) => alert('Failed to delete slot. Error: ' + err.message),
+        error: (error) => alert('Failed to delete slot: ' + error.message),
       });
     }
+  }
+
+  getDayDisplay(day: string): string {
+    const dayMap: { [key: string]: string } = {
+      MONDAY: 'Monday',
+      TUESDAY: 'Tuesday',
+      WEDNESDAY: 'Wednesday',
+      THURSDAY: 'Thursday',
+      FRIDAY: 'Friday',
+      SATURDAY: 'Saturday',
+      SUNDAY: 'Sunday',
+    };
+    return dayMap[day] || day;
   }
 }

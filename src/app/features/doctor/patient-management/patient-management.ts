@@ -1,116 +1,222 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PatientService } from '../../../core/services/patient.service';
-import { Patient } from '../../../models/patient-interface';
+import { RouterModule } from '@angular/router';
 
-// 1. Define the interfaces for type safety (keep these in a dedicated models file in a real app)
+// Patient interface
+interface Patient {
+  id: string;
+  name: string;
+  age: number;
+  gender: string;
+  phone: string;
+  email: string;
+  bloodGroup: string;
+  address: string;
+  totalVisits: number;
+  activeTreatments: number;
+  lastVisit: string;
+  registrationDate: string;
+  medicalHistory: Array<{
+    date: string;
+    type: string;
+    notes: string;
+  }>;
+}
 
 @Component({
   selector: 'app-patient-management',
-  standalone: true, // Use standalone component for modern Angular setup
-  imports: [CommonModule, FormsModule, RouterLink], // Import necessary Angular modules
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './patient-management.html',
-  styleUrl: './patient-management.css', // Assuming you have a CSS file
+  styleUrl: './patient-management.css',
 })
 export class PatientManagement implements OnInit {
-  // --- Data State ---
-  // Inject the service in the constructor
-  constructor(@Inject(PatientService) private patientService: PatientService) {}
+  // View state
+  currentView: 'grid' | 'list' = 'grid';
+  showProfileModal = false;
+  selectedPatient: Patient | null = null;
 
-  public filteredPatients: Patient[] = [];
-  public currentView: 'grid' | 'list' = 'grid';
-  public searchTerm: string = '';
-  public genderFilter: string = 'all';
-  public ageFilter: string = 'all';
-  public sortFilter: string = 'name';
+  // Filter state
+  searchTerm = '';
+  genderFilter = 'all';
+  ageFilter = 'all';
+  sortFilter = 'name';
 
-  public totalCount: number = 0;
-  public newCount: number = 0;
-  public activeCount: number = 0;
-  public followupCount: number = 0;
+  // Statistics
+  totalCount = 0;
+  newCount = 0;
+  activeCount = 0;
+  followupCount = 0;
 
-  public selectedPatient: Patient | null = null;
-  public showProfileModal: boolean = false;
+  // Sample data - replace with actual service calls
+  patients: Patient[] = [
+    {
+      id: '1',
+      name: 'John Doe',
+      age: 35,
+      gender: 'Male',
+      phone: '+1-555-0123',
+      email: 'john.doe@email.com',
+      bloodGroup: 'O+',
+      address: '123 Main St, City, State',
+      totalVisits: 5,
+      activeTreatments: 2,
+      lastVisit: '2024-01-15',
+      registrationDate: '2023-06-01',
+      medicalHistory: [
+        { date: '2024-01-15', type: 'Checkup', notes: 'Regular checkup, all vitals normal' },
+        { date: '2023-12-10', type: 'Follow-up', notes: 'Follow-up for medication' },
+      ],
+    },
+    {
+      id: '2',
+      name: 'Jane Smith',
+      age: 28,
+      gender: 'Female',
+      phone: '+1-555-0124',
+      email: 'jane.smith@email.com',
+      bloodGroup: 'A+',
+      address: '456 Oak Ave, City, State',
+      totalVisits: 3,
+      activeTreatments: 1,
+      lastVisit: '2024-01-10',
+      registrationDate: '2023-08-15',
+      medicalHistory: [
+        { date: '2024-01-10', type: 'Consultation', notes: 'Initial consultation for symptoms' },
+      ],
+    },
+  ];
 
-  ngOnInit(): void {
-    // Subscribe to the service data stream if using RxJS, or just call initial methods:
-    this.patientService.allPatients$.subscribe(() => {
-      this.refreshView();
+  get filteredPatients(): Patient[] {
+    let filtered = [...this.patients];
+
+    // Search filter
+    if (this.searchTerm) {
+      filtered = filtered.filter(
+        (patient) =>
+          patient.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          patient.email.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+    }
+
+    // Gender filter
+    if (this.genderFilter !== 'all') {
+      filtered = filtered.filter((patient) => patient.gender === this.genderFilter);
+    }
+
+    // Age filter
+    if (this.ageFilter !== 'all') {
+      filtered = filtered.filter((patient) => {
+        const age = patient.age;
+        switch (this.ageFilter) {
+          case '0-18':
+            return age >= 0 && age <= 18;
+          case '19-35':
+            return age >= 19 && age <= 35;
+          case '36-60':
+            return age >= 36 && age <= 60;
+          case '60+':
+            return age > 60;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Sort filter
+    filtered.sort((a, b) => {
+      switch (this.sortFilter) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'age':
+          return a.age - b.age;
+        case 'visits':
+          return b.totalVisits - a.totalVisits;
+        case 'lastVisit':
+          return new Date(b.lastVisit).getTime() - new Date(a.lastVisit).getTime();
+        default:
+          return 0;
+      }
     });
+
+    return filtered;
   }
 
-  // --- Core View Refresh Logic ---
-
-  public refreshView(): void {
-    // 1. Get filtered/sorted data from the service
-    this.filteredPatients = this.patientService.filterAndSortPatients(
-      this.searchTerm,
-      this.genderFilter,
-      this.ageFilter,
-      this.sortFilter
-    );
-
-    // 2. Calculate stats based on the FULL patient list
-    const allPatients = this.patientService.getPatients();
-    const stats = this.patientService.calculateStats(allPatients);
-
-    this.totalCount = stats.totalCount;
-    this.newCount = stats.newCount;
-    this.activeCount = stats.activeCount;
-    this.followupCount = stats.followupCount;
+  ngOnInit() {
+    this.calculateStats();
   }
 
-  // --- Utility Methods ---
+  calculateStats() {
+    this.totalCount = this.patients.length;
+    this.newCount = this.patients.filter((p) => {
+      const regDate = new Date(p.registrationDate);
+      const now = new Date();
+      const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+      return regDate >= monthAgo;
+    }).length;
+    this.activeCount = this.patients.reduce((sum, p) => sum + p.activeTreatments, 0);
+    this.followupCount = this.patients.filter((p) => {
+      const lastVisit = new Date(p.lastVisit);
+      const now = new Date();
+      const daysDiff = Math.floor((now.getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24));
+      return daysDiff > 30;
+    }).length;
+  }
 
-  public getInitials(name: string): string {
+  switchView(view: 'grid' | 'list') {
+    this.currentView = view;
+  }
+
+  refreshView() {
+    // This method is called when filters change
+    // The filteredPatients getter will automatically update
+  }
+
+  getInitials(name: string): string {
     return name
       .split(' ')
       .map((n) => n[0])
-      .join('');
+      .join('')
+      .toUpperCase();
   }
 
-  public getDaysSinceVisit(lastVisitDate: string): number {
-    const lastVisit = new Date(lastVisitDate).getTime();
-    return Math.floor((new Date().getTime() - lastVisit) / (1000 * 60 * 60 * 24));
+  getDaysSinceVisit(lastVisit: string): number {
+    const visitDate = new Date(lastVisit);
+    const now = new Date();
+    return Math.floor((now.getTime() - visitDate.getTime()) / (1000 * 60 * 60 * 24));
   }
 
-  public formatVisitDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  formatVisitDate(date: string): string {
+    return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
   }
 
-  // --- View Control & Actions ---
-
-  public switchView(view: 'grid' | 'list'): void {
-    this.currentView = view;
-  }
-
-  public viewProfile(patient: Patient): void {
+  viewProfile(patient: Patient) {
     this.selectedPatient = patient;
     this.showProfileModal = true;
   }
 
-  public closeModal(): void {
+  closeModal() {
     this.showProfileModal = false;
     this.selectedPatient = null;
   }
 
-  public bookAppointment(patient: Patient): void {
-    console.log(`[ACTION] Book Appointment for ${patient.name}.`);
-    this.closeModal();
+  bookAppointment(patient: Patient) {
+    // Implement booking logic
+    console.log('Booking appointment for:', patient.name);
   }
 
-  public sendMessage(patient: Patient): void {
-    console.log(`[ACTION] Send Message to ${patient.name}.`);
-    this.closeModal();
+  sendMessage(patient: Patient) {
+    // Implement messaging logic
+    console.log('Sending message to:', patient.name);
   }
 
-  public viewMedicalRecords(patient: Patient): void {
-    console.log(`[ACTION] Viewing records for ${patient.name}.`);
+  viewMedicalRecords(patient: Patient) {
+    // Implement medical records view
+    console.log('Viewing medical records for:', patient.name);
   }
 }

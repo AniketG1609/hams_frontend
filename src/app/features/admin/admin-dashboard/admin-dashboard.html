@@ -1,4 +1,5 @@
-<div id="admin-dashboard" class="dashboard">
+<!-- admin-dashboard.component.html -->
+<div class="dashboard">
   <div class="flex min-h-screen">
     <!-- Sidebar -->
     <aside class="w-64 bg-white shadow-md p-6 flex flex-col">
@@ -24,41 +25,13 @@
           <a
             href="#"
             class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:border-l-4 hover:border-blue-600 rounded-l"
-            >👥 Manage Patients</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:border-l-4 hover:border-blue-600 rounded-l"
-            >📅 Appointments</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:border-l-4 hover:border-blue-600 rounded-l"
-            >📈 Analytics</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:border-l-4 hover:border-blue-600 rounded-l"
-            >💰 Payments</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="flex items-center gap-2 px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:border-l-4 hover:border-blue-600 rounded-l"
             >⚙️ System Settings</a
           >
         </li>
         <li>
           <button
             (click)="logout()"
-            class="flex items-center gap-2 px-4 py-2 font-medium text-red-600 hover:bg-gray-100 hover:border-l-4 hover:border-red-600 rounded-l"
+            class="flex items-center gap-2 px-4 py-2 font-medium text-red-600 hover:bg-gray-100 hover:border-l-4 hover:border-red-600 rounded-l w-full text-left"
           >
             🚪 Logout
           </button>
@@ -72,84 +45,28 @@
       <div class="flex justify-between items-center mb-8 bg-white p-4 rounded-lg shadow">
         <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
         <div class="flex items-center gap-4">
-          <!-- Notifications -->
-          <div class="relative">
-            <button
-              onclick="toggleDropdown('admin-notifications')"
-              class="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center text-xl hover:bg-gray-200 transition"
-            >
-              🔔
-              <span
-                class="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white"
-                >5</span
-              >
-            </button>
-            <div
-              id="admin-notifications"
-              class="absolute right-0 mt-3 w-96 bg-white rounded-xl shadow-lg hidden max-h-96 overflow-y-auto z-50"
-            >
-              <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="font-semibold text-gray-800">Notifications</h3>
-                <button class="text-blue-600 text-sm font-medium">Mark all as read</button>
-              </div>
-              <div class="divide-y divide-gray-200">
-                <div class="p-4 bg-blue-50">
-                  <h4 class="font-semibold text-gray-800">New Doctor Registration</h4>
-                  <p class="text-gray-600 text-sm">
-                    Dr. Michael Roberts submitted registration documents for verification
-                  </p>
-                  <span class="text-gray-400 text-xs">15 minutes ago</span>
-                </div>
-                <div class="p-4 bg-blue-50">
-                  <h4 class="font-semibold text-gray-800">System Alert</h4>
-                  <p class="text-gray-600 text-sm">
-                    Server load increased by 20% - monitor performance
-                  </p>
-                  <span class="text-gray-400 text-xs">1 hour ago</span>
-                </div>
-                <div class="p-4 bg-blue-50">
-                  <h4 class="font-semibold text-gray-800">Payment Processed</h4>
-                  <p class="text-gray-600 text-sm">
-                    Monthly subscription payment of $5,240 received
-                  </p>
-                  <span class="text-gray-400 text-xs">2 hours ago</span>
-                </div>
-                <div class="p-4">
-                  <h4 class="font-semibold text-gray-800">Profile Update Request</h4>
-                  <p class="text-gray-600 text-sm">
-                    Dr. Jennifer Lee requested profile update approval
-                  </p>
-                  <span class="text-gray-400 text-xs">3 hours ago</span>
-                </div>
-                <div class="p-4">
-                  <h4 class="font-semibold text-gray-800">Milestone Reached</h4>
-                  <p class="text-gray-600 text-sm">System reached 100 appointments today!</p>
-                  <span class="text-gray-400 text-xs">5 hours ago</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Profile -->
-          <div class="relative">
+          <div class="relative dropdown-trigger">
             <div
-              onclick="toggleDropdown('admin-profile')"
+              (click)="toggleProfile()"
               class="flex items-center gap-3 bg-gray-100 p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
             >
               <div
                 class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold flex items-center justify-center"
               >
-                AD
+                {{ getAdminInitials() }}
               </div>
               <div class="text-left">
-                <div class="font-semibold text-gray-800 text-sm">Admin User</div>
+                <div class="font-semibold text-gray-800 text-sm">
+                  {{ currentAdmin?.adminName || 'Admin User' }}
+                </div>
                 <div class="text-gray-500 text-xs">System Administrator</div>
               </div>
               <span class="text-gray-500 text-xs">▼</span>
             </div>
+            @if (showProfile) {
             <div
-              id="admin-profile"
-              class="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-lg hidden z-50"
+              class="dropdown-content absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-lg z-50"
             >
               <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100">👤 My Profile</a>
               <a href="#" class="flex items-center gap-2 p-3 hover:bg-gray-100"
@@ -162,76 +79,32 @@
               >
               <button
                 (click)="logout()"
-                class="flex items-center gap-2 p-3 text-red-600 hover:bg-gray-100"
+                class="flex items-center gap-2 p-3 text-red-600 hover:bg-gray-100 w-full text-left"
               >
                 🚪 Logout
               </button>
             </div>
+            }
           </div>
         </div>
       </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div
-          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:-translate-y-1 hover:shadow-lg transition"
-        >
-          <div>
-            <h3 class="text-gray-500 text-sm font-medium mb-1">Total Doctors</h3>
-            <p class="text-2xl font-bold text-gray-800">156</p>
-          </div>
-          <div class="text-3xl">👨‍⚕️</div>
-        </div>
-        <div
-          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:-translate-y-1 hover:shadow-lg transition"
-        >
-          <div>
-            <h3 class="text-gray-500 text-sm font-medium mb-1">Total Patients</h3>
-            <p class="text-2xl font-bold text-gray-800">3,247</p>
-          </div>
-          <div class="text-3xl">👥</div>
-        </div>
-        <div
-          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:-translate-y-1 hover:shadow-lg transition"
-        >
-          <div>
-            <h3 class="text-gray-500 text-sm font-medium mb-1">Today's Appointments</h3>
-            <p class="text-2xl font-bold text-gray-800">89</p>
-          </div>
-          <div class="text-3xl">📅</div>
-        </div>
-        <div
-          class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:-translate-y-1 hover:shadow-lg transition"
-        >
-          <div>
-            <h3 class="text-gray-500 text-sm font-medium mb-1">Revenue (Month)</h3>
-            <p class="text-2xl font-bold text-gray-800">$45.2K</p>
-          </div>
-          <div class="text-3xl">💰</div>
-        </div>
+      <!-- Loading State -->
+      @if (isLoading) {
+      <div class="flex justify-center items-center h-64">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
+      } @else {
 
-      <!-- System Overview -->
+      <!-- Doctors List -->
       <div class="bg-white p-6 rounded-xl shadow mb-6">
         <div class="flex justify-between items-center mb-4 border-b pb-3">
-          <h2 class="text-lg font-semibold text-gray-800">System Overview</h2>
-          <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-            Generate Report
-          </button>
-        </div>
-        <div
-          class="h-72 flex items-center justify-center rounded-xl bg-gradient-to-br from-indigo-200 to-purple-200 text-gray-500 text-lg"
-        >
-          📊 Analytics Chart Area (Appointment Trends)
-        </div>
-      </div>
-
-      <!-- Recently Added Doctors -->
-      <div class="bg-white p-6 rounded-xl shadow mb-6">
-        <div class="flex justify-between items-center mb-4 border-b pb-3">
-          <h2 class="text-lg font-semibold text-gray-800">Recently Added Doctors</h2>
-          <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-            Add New Doctor
+          <h2 class="text-lg font-semibold text-gray-800">Registered Doctors</h2>
+          <button
+            (click)="openDoctorRegister()"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+          >
+            <span>+</span> Add New Doctor
           </button>
         </div>
         <div class="overflow-x-auto">
@@ -240,73 +113,210 @@
               <tr>
                 <th class="px-4 py-2 text-sm font-semibold text-gray-700">Name</th>
                 <th class="px-4 py-2 text-sm font-semibold text-gray-700">Specialization</th>
-                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Patients</th>
-                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Rating</th>
-                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Status</th>
+                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Experience</th>
+                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Qualification</th>
+                <th class="px-4 py-2 text-sm font-semibold text-gray-700">Contact Number</th>
                 <th class="px-4 py-2 text-sm font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
+              @for (doctor of recentDoctors; track doctor.doctorId) {
               <tr class="hover:bg-gray-50">
-                <td class="px-4 py-2 font-semibold">Dr. James Wilson</td>
-                <td class="px-4 py-2">Orthopedics</td>
-                <td class="px-4 py-2">45</td>
-                <td class="px-4 py-2">4.7 ⭐</td>
+                <td class="px-4 py-2 font-semibold">{{ doctor.doctorName }}</td>
+                <td class="px-4 py-2">{{ doctor.specialization }}</td>
+                <td class="px-4 py-2">{{ doctor.yearOfExperience }} years</td>
+                <td class="px-4 py-2">{{ doctor.qualification }}</td>
+                <td class="px-4 py-2">{{ doctor.contactNumber }}</td>
                 <td class="px-4 py-2">
-                  <span
-                    class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold"
-                    >Active</span
-                  >
-                </td>
-                <td class="px-4 py-2 flex gap-2">
-                  <button class="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">View</button>
-                  <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-                    Suspend
-                  </button>
+                  <div class="flex gap-2">
+                    <button
+                      (click)="openUpdateDoctor(doctor)"
+                      class="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      (click)="deleteDoctor(doctor.doctorId)"
+                      class="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
-              <tr class="hover:bg-gray-50">
-                <td class="px-4 py-2 font-semibold">Dr. Lisa Anderson</td>
-                <td class="px-4 py-2">Pediatrics</td>
-                <td class="px-4 py-2">67</td>
-                <td class="px-4 py-2">4.9 ⭐</td>
-                <td class="px-4 py-2">
-                  <span
-                    class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold"
-                    >Active</span
-                  >
-                </td>
-                <td class="px-4 py-2 flex gap-2">
-                  <button class="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">View</button>
-                  <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-                    Suspend
-                  </button>
+              } @if (recentDoctors.length === 0) {
+              <tr>
+                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                  No doctors found. Click "Add New Doctor" to register the first doctor.
                 </td>
               </tr>
-              <tr class="hover:bg-gray-50">
-                <td class="px-4 py-2 font-semibold">Dr. Robert Chen</td>
-                <td class="px-4 py-2">Neurology</td>
-                <td class="px-4 py-2">32</td>
-                <td class="px-4 py-2">4.6 ⭐</td>
-                <td class="px-4 py-2">
-                  <span
-                    class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold"
-                    >Pending Verification</span
-                  >
-                </td>
-                <td class="px-4 py-2 flex gap-2">
-                  <button class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">
-                    Approve
-                  </button>
-                  <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-                    Reject
-                  </button>
-                </td>
-              </tr>
+              }
             </tbody>
           </table>
         </div>
       </div>
+      }
+
+      <!-- Doctor Registration Modal -->
+      @if (showDoctorRegister) {
+      <div
+        class="fixed inset-0 flex items-center justify-center p-4 z-50"
+        (click)="closeDoctorRegister()"
+        style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px)"
+      >
+        <div
+          class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative"
+          (click)="$event.stopPropagation()"
+        >
+          <app-doctor-register
+            [isOpen]="showDoctorRegister"
+            [specializations]="getSpecializations()"
+            (close)="closeDoctorRegister()"
+            (doctorCreated)="onDoctorCreated()"
+          ></app-doctor-register>
+        </div>
+      </div>
+      }
+
+      <!-- Update Doctor Modal -->
+      @if (showUpdateDoctor && selectedDoctor) {
+      <div
+        class="fixed inset-0 flex items-center justify-center p-4 z-50"
+        (click)="closeUpdateDoctor()"
+        style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px)"
+      >
+        <div
+          class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative"
+          (click)="$event.stopPropagation()"
+        >
+          <div
+            class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-2xl"
+          >
+            <div>
+              <h2 class="text-2xl font-bold text-gray-800">Update Doctor Details</h2>
+              <p class="text-gray-600 mt-1">Update contact information and experience</p>
+            </div>
+            <button
+              (click)="closeUpdateDoctor()"
+              class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="p-6">
+            <!-- Doctor Info (Read-only) -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+              <h3 class="font-semibold text-gray-800 mb-2">Doctor Information (Read-only)</h3>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <label class="text-gray-600">Name:</label>
+                  <p class="font-medium">{{ selectedDoctor.doctorName }}</p>
+                </div>
+                <div>
+                  <label class="text-gray-600">Email:</label>
+                  <p class="font-medium">{{ selectedDoctor.email }}</p>
+                </div>
+                <div>
+                  <label class="text-gray-600">Qualification:</label>
+                  <p class="font-medium">{{ selectedDoctor.qualification }}</p>
+                </div>
+                <div>
+                  <label class="text-gray-600">Specialization:</label>
+                  <p class="font-medium">{{ selectedDoctor.specialization }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Update Form -->
+            <form [formGroup]="updateDoctorForm" (ngSubmit)="onUpdateDoctor()" class="space-y-4">
+              <!-- Contact Number -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Contact Number</label>
+                <input
+                  type="tel"
+                  formControlName="contactNumber"
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200"
+                  placeholder="Enter contact number"
+                />
+                @if (updateDoctorForm.get('contactNumber')?.invalid &&
+                updateDoctorForm.get('contactNumber')?.touched) {
+                <p class="text-red-500 text-sm mt-1">Contact number must be exactly 10 digits.</p>
+                }
+              </div>
+
+              <!-- Years of Experience -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2"
+                  >Years of Experience</label
+                >
+                <input
+                  type="number"
+                  formControlName="yearOfExperience"
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200"
+                  placeholder="Enter years of experience"
+                  min="0"
+                  max="50"
+                />
+                @if (updateDoctorForm.get('yearOfExperience')?.invalid &&
+                updateDoctorForm.get('yearOfExperience')?.touched) {
+                <p class="text-red-500 text-sm mt-1">Years of experience is required (0-50).</p>
+                }
+              </div>
+
+              <!-- Clinic Address -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Clinic Address</label>
+                <textarea
+                  formControlName="clinicAddress"
+                  rows="3"
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 resize-none"
+                  placeholder="Enter clinic address"
+                ></textarea>
+                @if (updateDoctorForm.get('clinicAddress')?.invalid &&
+                updateDoctorForm.get('clinicAddress')?.touched) {
+                <p class="text-red-500 text-sm mt-1">
+                  Clinic address is required (min 10 characters).
+                </p>
+                }
+              </div>
+
+              <!-- Error Message -->
+              @if (updateError) {
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p class="text-red-600 text-sm">{{ updateError }}</p>
+              </div>
+              }
+
+              <!-- Action Buttons -->
+              <div class="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  (click)="closeUpdateDoctor()"
+                  class="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  [disabled]="updateDoctorForm.invalid || isUpdating"
+                  class="flex-1 py-3 bg-green-600 text-white rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg"
+                >
+                  {{ isUpdating ? 'Updating...' : 'Update Doctor' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      }
     </main>
   </div>
 </div>

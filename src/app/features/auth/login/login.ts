@@ -1,5 +1,6 @@
+// login.component.ts - IMPROVED VERSION
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PatientAuthService } from '../../../core/services/patient-auth.service';
@@ -8,66 +9,69 @@ import { Observable } from 'rxjs';
 import { DoctorAuthService } from '../../../core/services/doctor-auth.service';
 import { AdminAuthService } from '../../../core/services/admin-auth.service';
 import { AuthDoctorLogin } from '../../../models/auth-doctor-interface';
+import { AuthAdminLogin } from '../../../models/auth-admin-interface';
+import { AuthManagerService } from '../../../core/services/auth-manager.service';
 
-type LoginMode = 'patient' | 'doctor' | 'admin'; // Add other modes as needed
+type LoginMode = 'patient' | 'doctor' | 'admin';
 
 @Component({
   selector: 'app-login',
-  standalone: true, // Assuming standalone for modern Angular
   templateUrl: './login.html',
   styleUrl: './login.css',
-  imports: [ReactiveFormsModule, CommonModule, RouterLink], // Modules required by the template
+  imports: [ReactiveFormsModule, CommonModule, RouterLink],
 })
-export class Login {
+export class Login implements OnInit {
   private fb = inject(FormBuilder);
   private patientAuthService = inject(PatientAuthService);
   private doctorAuthService = inject(DoctorAuthService);
-  private adminAuthService = inject(AdminAuthService); // Replace with actual AdminAuthService when available
+  private adminAuthService = inject(AdminAuthService);
+  private authManager = inject(AuthManagerService);
   private router = inject(Router);
-  private route = inject(ActivatedRoute);
 
   loginForm!: FormGroup;
   errorMessage: string = '';
   isLoading: boolean = false;
-  showPassword: boolean = false; // State for password visibility
-  returnUrl: string = '';
+  showPassword: boolean = false;
+  loginMode: LoginMode = 'patient';
 
   constructor() {
     this.loginForm = this.fb.group({
-      // Mapping 'Email Address' field in HTML to 'username' form control
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
   ngOnInit() {
-    // Get return url from route parameters or default to patient dashboard
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/patient/dashboard';
+    // Debug current state
+    this.authManager.debugAuthState();
 
-    // If already authenticated, redirect to returnUrl
-    if (this.getAuthenticatedRole() !== null) {
-      this.redirectAuthenticatedUser();
+    // Check if user is already authenticated and redirect only if they're not on a protected route
+    const currentRole = this.authManager.getCurrentUserRole();
+    if (currentRole) {
+      console.log('Already authenticated as:', currentRole);
+      // Only redirect if we're not already on a dashboard route
+      const currentUrl = this.router.url;
+      console.log('Current URL:', currentUrl);
+
+      if (
+        !currentUrl.includes('/patient/dashboard') &&
+        !currentUrl.includes('/doctor/dashboard') &&
+        !currentUrl.includes('/admin/dashboard')
+      ) {
+        console.log('Redirecting to dashboard for role:', currentRole);
+        this.redirectToRoleDashboard(currentRole);
+      } else {
+        console.log('Already on dashboard route, not redirecting');
+      }
+    } else {
+      console.log('No valid authentication found');
     }
   }
 
-  private getAuthenticatedRole(): string | null {
-    if (this.patientAuthService.getToken()) {
-      return 'PATIENT';
-    }
-    if (this.doctorAuthService.getToken()) {
-      return 'DOCTOR';
-    }
-    if (this.adminAuthService.getToken()) {
-      return 'ADMIN';
-    }
-    return null;
-  }
-
-  private redirectAuthenticatedUser(): void {
-    const role = this.getAuthenticatedRole();
+  private redirectToRoleDashboard(role: string): void {
     switch (role) {
       case 'PATIENT':
-        this.router.navigateByUrl(this.returnUrl);
+        this.router.navigate(['/patient/dashboard']);
         break;
       case 'DOCTOR':
         this.router.navigate(['/doctor/dashboard']);
@@ -80,7 +84,6 @@ export class Login {
     }
   }
 
-  // Helper function to easily access form controls in the template
   get f() {
     return this.loginForm.controls;
   }
@@ -89,53 +92,79 @@ export class Login {
     this.showPassword = !this.showPassword;
   }
 
+  setLoginMode(mode: LoginMode): void {
+    this.loginMode = mode;
+    this.errorMessage = '';
+    this.loginForm.reset();
+  }
+
   onLogin(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.errorMessage = '';
 
-      const loginRequestP: AuthPatientLogin = {
-        // Retrieve values directly from the form group
-        username: this.loginForm.value.username,
-        password: this.loginForm.value.password,
-      };
+      console.log(`🔐 Attempting ${this.loginMode} login...`);
 
-      const loginRequestD: AuthDoctorLogin = {
-        // Retrieve values directly from the form group
-        username: this.loginForm.value.username,
-        password: this.loginForm.value.password,
-      };
+      // Clear any existing sessions before new login attempt
+      this.authManager.prepareForLogin();
 
-      const loginRequestA = {
-        // Retrieve values directly from the form group
-        username: this.loginForm.value.username,
-        password: this.loginForm.value.password,
-      };
+      const username = this.loginForm.value.username;
+      const password = this.loginForm.value.password;
 
       let loginObservable: Observable<any>;
-      let redirectPath: string;
 
-      if (this.loginMode === 'patient') {
-        loginObservable = this.patientAuthService.login(loginRequestP);
-        redirectPath = '/patient/dashboard';
-      } else if (this.loginMode === 'doctor') {
-        loginObservable = this.doctorAuthService.login(loginRequestD);
-        redirectPath = '/doctor/dashboard';
-      } else if (this.loginMode === 'admin') {
-        loginObservable = this.adminAuthService.login(loginRequestA);
-        redirectPath = '/admin/dashboard';
-      }
-      loginObservable!.subscribe({
-        next: () => {
+      switch (this.loginMode) {
+        case 'patient':
+          const patientRequest: AuthPatientLogin = { username, password };
+          loginObservable = this.patientAuthService.login(patientRequest);
+          break;
+        case 'doctor':
+          const doctorRequest: AuthDoctorLogin = { username, password };
+          loginObservable = this.doctorAuthService.login(doctorRequest);
+          break;
+        case 'admin':
+          const adminRequest: AuthAdminLogin = { username, password };
+          loginObservable = this.adminAuthService.login(adminRequest);
+          break;
+        default:
+          this.errorMessage = 'Invalid login mode';
           this.isLoading = false;
-          this.router.navigate([redirectPath]);
+          return;
+      }
+
+      loginObservable.subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          console.log('✅ Login API call successful');
+
+          // Wait a moment for localStorage to be updated, then check
+          setTimeout(() => {
+            console.log('🕒 Checking stored authentication data...');
+
+            const actualRole = this.getStoredRoleForMode();
+            console.log('🎯 Actual stored role:', actualRole);
+            console.log('🎯 Expected role:', this.loginMode.toUpperCase());
+
+            if (actualRole === this.loginMode.toUpperCase()) {
+              console.log('✅ Role matches - redirecting to dashboard');
+              // Use replaceUrl to prevent back navigation to login
+              this.router.navigate([`/${this.loginMode}/dashboard`], { replaceUrl: true });
+            } else {
+              this.errorMessage = `Authentication successful but role issue. Expected ${this.loginMode.toUpperCase()}, got ${actualRole}.`;
+              console.error('❌ Role mismatch after login - clearing session');
+
+              // Debug what's actually in localStorage
+              this.debugLocalStorage();
+
+              // Clear the invalid session
+              this.authManager.prepareForLogin();
+            }
+          }, 100);
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage =
-            error?.error?.message ||
-            `Login failed for ${this.loginMode}. Invalid credentials or network error.`;
-          console.error('Login error:', error);
+          console.error('❌ Login API error:', error);
+          this.handleLoginError(error);
         },
       });
     } else {
@@ -143,12 +172,50 @@ export class Login {
     }
   }
 
-  isPatientMode: boolean = true;
-  loginMode: LoginMode = 'patient';
+  // Add this helper method to debug localStorage
+  private debugLocalStorage(): void {
+    console.log('📦 Current localStorage auth data:');
+    const authKeys = [
+      'authPatientToken',
+      'patientData',
+      'authDoctorToken',
+      'doctorData',
+      'authAdminToken',
+      'adminData',
+      'userRole',
+    ];
+    authKeys.forEach((key) => {
+      const value = localStorage.getItem(key);
+      console.log(`   ${key}:`, value ? 'PRESENT' : 'ABSENT');
+    });
+  }
 
-  toggleLoginMode(mode: LoginMode): void {
-    this.loginMode = mode;
-    this.errorMessage = '';
-    this.loginForm.reset();
+  private getStoredRoleForMode(): string | null {
+    switch (this.loginMode) {
+      case 'patient':
+        return this.patientAuthService.getUserRole();
+      case 'doctor':
+        return this.doctorAuthService.getUserRole();
+      case 'admin':
+        return this.adminAuthService.getUserRole();
+      default:
+        return null;
+    }
+  }
+
+  private handleLoginError(error: any): void {
+    console.error('Login error:', error);
+
+    if (error.status === 401) {
+      this.errorMessage = 'Invalid username or password.';
+    } else if (error.status === 403) {
+      this.errorMessage = 'Access denied for this account type.';
+    } else if (error.status === 0) {
+      this.errorMessage = 'Network error. Please check your connection.';
+    } else if (error.message) {
+      this.errorMessage = error.message;
+    } else {
+      this.errorMessage = error.error?.message || `Login failed. Please try again.`;
+    }
   }
 }

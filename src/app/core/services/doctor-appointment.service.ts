@@ -49,13 +49,13 @@ export class AppointmentService {
   // 🔑 Confirm Appointment (POST /doctors/appointments/{id}/confirm)
   confirmAppointment(appointmentId: number): Observable<any> {
     // Assuming backend uses POST with an empty body
-    return this.http.post(`${this.doctorAppointmentsUrl}/${appointmentId}/confirm`, {});
+    return this.http.post(`${this.apiUrl}/doctors/me/appointments/${appointmentId}/confirm`, {});
   }
 
   // 🔑 5. Reject Appointment
   rejectAppointment(appointmentId: number, reason?: string): Observable<any> {
     const body = reason ? { reason } : {}; // Send reason in the body
-    return this.http.post(`${this.doctorAppointmentsUrl}/${appointmentId}/reject`, body);
+    return this.http.post(`${this.apiUrl}/doctors/me/appointments/${appointmentId}/reject`, body);
   }
 
   saveConsultationNotes(appointmentId: number, notesPayload: any): Observable<any> {

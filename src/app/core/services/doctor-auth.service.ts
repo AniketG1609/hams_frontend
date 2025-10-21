@@ -9,7 +9,6 @@ import {
   AuthDoctorResponse,
 } from '../../models/auth-doctor-interface';
 import { Router } from '@angular/router';
-import { redirectBasedOnRole } from '../../models/redirectBasedOnRole';
 import { JwtService } from './jwt.service';
 
 @Injectable({

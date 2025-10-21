@@ -5,15 +5,15 @@ import { CommonModule } from '@angular/common'; // Needed for *ngIf (assuming co
 
 // 🔑 Define the Dummy Doctor Object
 const DUMMY_DOCTOR: Doctor = {
-  id: 0,
-  name: 'Profile Unavailable', // Use simpler name for initials fallback
+  doctorId: 0,
+  doctorName: 'Profile Unavailable', // Use simpler name for initials fallback
   qualification: 'M.B.B.S, M.D.',
   specialization: 'General Practice (Fallback)',
   clinicAddress: 'N/A: Error Fetching Data',
-  yearsOfExperience: 0,
-  phoneNumber: 'N/A',
+  yearOfExperience: 0,
+  contactNumber: 'N/A',
   email: 'error@example.com',
-  licenseNumber: 'N/A',
+  // licenseNumber: 'N/A',
 };
 
 @Component({

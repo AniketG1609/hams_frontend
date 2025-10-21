@@ -6,10 +6,11 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { DoctorService } from '../../../core/services/doctor.service';
-import { DoctorAuthService } from '../../../core/services/doctor-auth.service';
-import { AppointmentService } from '../../../core/services/doctor-appointment.service';
-import { Appointment, Doctor } from '../../../models/doctor-appointment-interface';
+import { Doctor } from '../../../models/auth-doctor-interface.js';
+import { DoctorService } from '../../../core/services/doctor.service.js';
+import { DoctorAuthService } from '../../../core/services/doctor-auth.service.js';
+import { AppointmentService } from '../../../core/services/doctor-appointment.service.js';
+import { Appointment } from '../../../models/doctor-appointment-interface';
 
 @Component({
   selector: 'app-doctor-dashboard',
@@ -92,23 +93,13 @@ export class DoctorDashboard implements OnInit {
 
   fetchDoctorProfile(): void {
     // 🔑 Subscribe expects the 'Doctor' object directly
-    this.doctorService.getLoggedInDoctorProfile().subscribe(
-      (profile: any) => {
-        // Ensure the profile has all Doctor properties
-        const doctor: Doctor = {
-          doctorId: profile.doctorId ?? 0,
-          doctorName: profile.doctorName ?? '',
-          qualification: profile.qualification ?? '',
-          specialization: profile.specialization ?? '',
-          clinicAddress: profile.clinicAddress ?? '',
-          yearOfExperience: profile.yearOfExperience ?? 0,
-          contactNumber: profile.contactNumber ?? '',
-          email: profile.email ?? '',
-        };
-        this.doctorProfile = doctor;
-        this.doctorInitials = this.generateInitials(doctor.doctorName);
+    this.doctorService.getLoggedInDoctorProfile().subscribe({
+      next: (profile: Doctor) => {
+        this.doctorProfile = profile;
+        // 🔑 Use the correct field name: profile.doctorName
+        this.doctorInitials = this.generateInitials(profile.doctorName);
       },
-      (err: any) => {
+      error: (err: any) => {
         console.error('Failed to fetch doctor profile:', err);
         // Create a fake doctor profile with a random name
         const randomName = this.generateRandomDoctorName();
@@ -123,8 +114,8 @@ export class DoctorDashboard implements OnInit {
           email: 'unknown@clinic.com',
         };
         this.doctorInitials = this.generateInitials(randomName);
-      }
-    );
+      },
+    });
   }
 
   generateInitials(fullName: string): string {

@@ -20,14 +20,14 @@ export interface AuthDoctorLogin {
 }
 
 export interface Doctor {
-  id: number;
-  name: string;
+  doctorId: number;
+  doctorName: string;
   email: string;
-  phoneNumber: string;
+  contactNumber: string;
   qualification: string;
   specialization: string;
-  yearsOfExperience: number;
-  licenseNumber: string;
+  yearOfExperience: number;
+  // licenseNumber: string;
   clinicAddress: string;
 }
 

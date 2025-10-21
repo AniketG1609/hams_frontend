@@ -23,7 +23,7 @@ export const environment = {
     addAppointments: '/patients/me/appointments',
     getAppointments: '/patients/me/status',
     updateAppointment: '/patients/me/appointments/{appointmentId}',
-    cancelAppointment: '/patients/me/appointments/{appointmentId}/cancel',
+    cancelAppointment: '/appointments/{appointmentId}/cancel',
     getPatient: '/patients/me',
     updatePatient: '/patients/me',
     searchDoctors: '/patients/doctor-name?specialty={specialty}&name={name}',

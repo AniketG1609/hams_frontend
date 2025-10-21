@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { Header } from '../../../shared/patient/header/header';
 import { AppointmentResponseDTO } from '../../../models/appointment-interface';
 import { Patient } from '../../../models/patient-interface';
+import { AppointmentService } from '../../../core/services/patient-appointment.service';
 import { PatientService } from '../../../core/services/patient.service';
 import { Sidebar } from '../../../shared/patient/sidebar/sidebar';
-import { AppointmentService } from '../../../core/services/patient-appointment.service';
 
 @Component({
   selector: 'app-my-appointments',
@@ -20,8 +20,21 @@ export class MyAppointments implements OnInit {
   filteredAppointments: AppointmentResponseDTO[] = [];
   patient: Patient | null = null;
   filterStatus: string = 'all';
+
+  // Modal states
   showCancelModal: boolean = false;
+  showDetailsModal: boolean = false;
+  showRescheduleModal: boolean = false;
+
+  // Selected appointments
   appointmentToCancel: AppointmentResponseDTO | null = null;
+  selectedAppointment: AppointmentResponseDTO | null = null;
+  appointmentToReschedule: AppointmentResponseDTO | null = null;
+
+  // Reschedule form data
+  rescheduleDate: string = '';
+  rescheduleTime: string = '';
+  minDate: string = '';
 
   constructor(
     private appointmentService: AppointmentService,
@@ -31,6 +44,12 @@ export class MyAppointments implements OnInit {
   ngOnInit(): void {
     this.loadPatientData();
     this.loadAppointments();
+    this.setMinDate();
+  }
+
+  setMinDate(): void {
+    const today = new Date();
+    this.minDate = today.toISOString().split('T')[0];
   }
 
   loadPatientData(): void {
@@ -70,6 +89,18 @@ export class MyAppointments implements OnInit {
     this.filterAppointments();
   }
 
+  // View Details Methods
+  viewAppointmentDetails(appointment: AppointmentResponseDTO): void {
+    this.selectedAppointment = appointment;
+    this.showDetailsModal = true;
+  }
+
+  closeDetailsModal(): void {
+    this.showDetailsModal = false;
+    this.selectedAppointment = null;
+  }
+
+  // Cancel Appointment Methods
   openCancelModal(appointment: AppointmentResponseDTO): void {
     this.appointmentToCancel = appointment;
     this.showCancelModal = true;
@@ -94,6 +125,56 @@ export class MyAppointments implements OnInit {
     }
   }
 
+  // Reschedule Appointment Methods
+  openRescheduleModal(appointment: AppointmentResponseDTO): void {
+    this.appointmentToReschedule = appointment;
+    this.rescheduleDate = '';
+    this.rescheduleTime = '';
+    this.showRescheduleModal = true;
+  }
+
+  closeRescheduleModal(): void {
+    this.showRescheduleModal = false;
+    this.appointmentToReschedule = null;
+    this.rescheduleDate = '';
+    this.rescheduleTime = '';
+  }
+
+  rescheduleAppointment(): void {
+    if (this.appointmentToReschedule && this.rescheduleDate && this.rescheduleTime) {
+      // For demo purposes - in real app, you would call an API
+      console.log('Rescheduling appointment:', {
+        appointmentId: this.appointmentToReschedule.appointmentId,
+        newDate: this.rescheduleDate,
+        newTime: this.rescheduleTime,
+      });
+
+      // Show success message and reload appointments
+      alert('Appointment rescheduled successfully!');
+      this.loadAppointments();
+      this.closeRescheduleModal();
+
+      // In a real application, you would call:
+      this.appointmentService
+        .updateAppointment(this.appointmentToReschedule.appointmentId, {
+          appointmentDate: this.rescheduleDate,
+          startTime: this.rescheduleTime.split('-')[0],
+          endTime: this.rescheduleTime.split('-')[1],
+          doctorId: 0,
+        })
+        .subscribe({
+          next: () => {
+            this.loadAppointments();
+            this.closeRescheduleModal();
+          },
+          error: (error) => {
+            console.error('Error rescheduling appointment:', error);
+          },
+        });
+    }
+  }
+
+  // Utility Methods
   getStatusBadgeClass(status: string): string {
     switch (status) {
       case 'CONFIRMED':
@@ -112,6 +193,10 @@ export class MyAppointments implements OnInit {
   }
 
   canCancelAppointment(status: string): boolean {
+    return status === 'PENDING' || status === 'CONFIRMED';
+  }
+
+  canRescheduleAppointment(status: string): boolean {
     return status === 'PENDING' || status === 'CONFIRMED';
   }
 

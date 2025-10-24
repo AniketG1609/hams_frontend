@@ -1,21 +1,25 @@
+import { NotificationService } from './../../../core/services/patient-notification-service';
 // DoctorDashboard.ts (or AdminDashboard.ts)
 
 import { Component, OnInit } from '@angular/core';
 // 💡 If you encountered TS2835 errors (module resolution), this import must be:
 // import { AppointmentService } from '../../../core/services/appointment.service.js';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Doctor } from '../../../models/auth-doctor-interface.js';
-import { DoctorService } from '../../../core/services/doctor.service.js';
-import { DoctorAuthService } from '../../../core/services/doctor-auth.service.js';
-import { AppointmentService } from '../../../core/services/doctor-appointment.service.js';
+import { AppointmentService } from '../../../core/services/doctor-appointment-service.js';
 import { Appointment } from '../../../models/doctor-appointment-interface';
+import { DoctorHeader } from '../../../shared/doctor/header/header.js';
+import { NotificationResponseDTO } from '../../../models/notification-interface.js';
+import { DoctorResponseDTO } from '../../../models/doctor-interface.js';
+import { DoctorService } from '../../../core/services/doctor-service.js';
+import { DoctorNotificationService } from '../../../core/services/doctor-notification-service';
+import { Sidebar } from '@shared/doctor/sidebar/sidebar';
 
 @Component({
   selector: 'app-doctor-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, DoctorHeader, Sidebar],
   templateUrl: './doctor-dashboard.html',
   styleUrl: './doctor-dashboard.css',
 })
@@ -23,33 +27,34 @@ export class DoctorDashboard implements OnInit {
   AppointmentCount: number = 0;
   totalPatientCount: number = 0;
   pendingReviewsCount: number = 0; // 🔑 New property for Pending Reviews
-
-  doctorProfile: Doctor | null = null;
-  doctorInitials: string = '';
+  doctor: DoctorResponseDTO | null = null;
+  notifications: NotificationResponseDTO[] = [];
+  stats = {
+    upcomingAppointments: 0,
+    activePrescriptions: 0,
+    medicalRecords: 0,
+    notifications: 0,
+  };
 
   todayAppointments: Appointment[] = [];
 
   constructor(
     private appointmentService: AppointmentService,
     private doctorService: DoctorService,
-    private doctorAuthService: DoctorAuthService,
+    private notificationService: DoctorNotificationService,
     public router: Router
   ) {}
 
   ngOnInit(): void {
+    this.fetchDoctorProfile();
+    this.fetchNotificationCount();
     this.fetchAppointmentCount();
     this.fetchTotalPatientCount();
     this.fetchPendingReviewsCount();
-    this.fetchDoctorProfile();
     this.fetchTodayAppointments();
   }
 
   // DoctorDashboard.ts
-
-  logout() {
-    this.doctorAuthService.logout();
-    this.router.navigate(['/auth/login']);
-  }
 
   fetchAppointmentCount(): void {
     this.appointmentService.getTodayAppointmentCount().subscribe({
@@ -91,29 +96,36 @@ export class DoctorDashboard implements OnInit {
     });
   }
 
+  // DoctorDashboard.ts (or the component where this method resides)
+
+  // Assuming 'this.doctorService' refers to the service containing getLoggedInDoctorProfile
+  // If you injected it as 'doctorAuthService', update the property name accordingly.
+
   fetchDoctorProfile(): void {
-    // 🔑 Subscribe expects the 'Doctor' object directly
+    // Assuming DoctorAuthService has a method to get the logged-in doctor's profile
+    // 🔑 FIX: Add parentheses () to call the method and return the Observable.
     this.doctorService.getLoggedInDoctorProfile().subscribe({
-      next: (profile: Doctor) => {
-        this.doctorProfile = profile;
-        // 🔑 Use the correct field name: profile.doctorName
-        this.doctorInitials = this.generateInitials(profile.doctorName);
+      next: (profile: DoctorResponseDTO) => {
+        this.doctor = profile; // 👈 Populates the 'doctor' property
       },
       error: (err: any) => {
         console.error('Failed to fetch doctor profile:', err);
-        // Create a fake doctor profile with a random name
-        const randomName = this.generateRandomDoctorName();
-        this.doctorProfile = {
-          doctorId: 0,
-          doctorName: randomName,
-          qualification: 'MD',
-          specialization: 'General Medicine',
-          clinicAddress: 'Unknown Clinic',
-          yearOfExperience: 5,
-          contactNumber: '000-000-0000',
-          email: 'unknown@clinic.com',
-        };
-        this.doctorInitials = this.generateInitials(randomName);
+        // Handle error: e.g., redirect or set a default
+      },
+    });
+  }
+
+  fetchNotificationCount(): void {
+    // 🔑 FIX 1: Change 'markAllAsRead' to a method designed to GET the count (e.g., 'getUnreadNotificationCount').
+    // 🔑 FIX 2: Add parentheses () to call the method.
+    this.notificationService.getUnreadNotificationCount().subscribe({
+      next: (count: number) => {
+        // The service should return the count, which is then assigned to stats.notifications
+        this.stats.notifications = count;
+      },
+      error: (err: any) => {
+        console.error('Failed to fetch notification count:', err);
+        this.stats.notifications = 0; // Set to 0 on failure
       },
     });
   }

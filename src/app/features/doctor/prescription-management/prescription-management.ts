@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prescription, Medication } from '../../../models/prescription-interface';
 import { Patient } from '../../../models/patient-interface';
-import { DoctorPrescriptionService } from '../../../core/services/doctor-prescription.service';
+import { DoctorPrescriptionService } from '../../../core/services/doctor-prescription-service';
 
 @Component({
   selector: 'app-doctor-prescriptions',

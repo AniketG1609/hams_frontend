@@ -1,58 +1,41 @@
-// patient-auth.service.ts - FIXED VERSION
+// admin-auth.service.ts - FIXED VERSION
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { Router } from '@angular/router';
-import {
-  AuthPatientLogin,
-  AuthPatientRequest,
-  AuthPatientResponse,
-} from '../../models/auth-patient-interface';
 import { environment } from '../../environments/environment';
+import { Router } from '@angular/router';
 import { redirectBasedOnRole } from '../../models/redirectBasedOnRole';
-import { JwtService } from './jwt.service';
+import { AuthAdminLogin, AuthAdminResponse } from '../../models/auth-admin-interface';
+import { JwtService } from './jwt-service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PatientAuthService {
+export class AdminAuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private jwtService = inject(JwtService);
-  private apiUrlForRegistration = environment.apiUrl + environment.auth.register;
-  private apiUrlForLogin = environment.apiUrl + environment.auth.login;
-  private tokenKey = 'authPatientToken';
-  private patientKey = 'patientData';
+  private apiUrlForLogin = environment.apiUrl + environment.admin.adminLogin;
+  private tokenKey = 'authAdminToken';
+  private adminKey = 'adminData';
   private userRoleKey = 'userRole';
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   private userRoleSubject = new BehaviorSubject<string>(this.getUserRole());
 
-  register(registerRequest: AuthPatientRequest): Observable<any> {
-    return this.http
-      .post<AuthPatientResponse>(`${this.apiUrlForRegistration}`, registerRequest, {
-        responseType: 'text' as 'json',
-      })
-      .pipe(
-        tap((response) => {
-          this.setRegisteredPatient(response, 'PATIENT');
-        })
-      );
-  }
-
-  login(loginRequest: AuthPatientLogin): Observable<AuthPatientResponse> {
-    return this.http.post<AuthPatientResponse>(`${this.apiUrlForLogin}`, loginRequest).pipe(
+  login(loginRequest: AuthAdminLogin): Observable<AuthAdminResponse> {
+    return this.http.post<AuthAdminResponse>(`${this.apiUrlForLogin}`, loginRequest).pipe(
       tap((response) => {
         this.clearOtherAuthData(); // Clear other roles first
-        const role = 'PATIENT'; // Assuming your patient response structure
+        // Get role from the response admin object, not from token
+        const role = response.admin?.role || 'ADMIN';
         this.setAuthData(response, role);
-        this.isAuthenticatedSubject.next(true);
       })
     );
   }
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.patientKey);
+    localStorage.removeItem(this.adminKey);
     localStorage.removeItem(this.userRoleKey);
     this.userRoleSubject.next('');
     this.router.navigate(['/auth/login']);
@@ -63,9 +46,9 @@ export class PatientAuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
-  getCurrentPatient(): AuthPatientResponse | null {
-    const patientData = localStorage.getItem(this.patientKey);
-    return patientData ? (JSON.parse(patientData) as AuthPatientResponse) : null;
+  getCurrentAdmin(): AuthAdminResponse | null {
+    const adminData = localStorage.getItem(this.adminKey);
+    return adminData ? (JSON.parse(adminData) as AuthAdminResponse) : null;
   }
 
   getUserRole(): string {
@@ -81,52 +64,46 @@ export class PatientAuthService {
   }
 
   private clearOtherAuthData(): void {
-    // Clear doctor and admin data
+    // Clear patient and doctor data
+    localStorage.removeItem('authPatientToken');
+    localStorage.removeItem('patientData');
     localStorage.removeItem('authDoctorToken');
     localStorage.removeItem('doctorData');
-    localStorage.removeItem('authAdminToken');
-    localStorage.removeItem('adminData');
     localStorage.removeItem('userRole'); // Clear generic role storage
   }
 
-  private setRegisteredPatient(data: AuthPatientResponse, role: string): void {
-    localStorage.setItem(this.patientKey, JSON.stringify(data));
-    localStorage.setItem(this.userRoleKey, role);
-    this.isAuthenticatedSubject.next(true);
-  }
+  private setAuthData(response: AuthAdminResponse, role: string): void {
+    console.log('🔄 AdminAuthService.setAuthData called');
 
-  private setAuthData(response: AuthPatientResponse, role: string): void {
-    console.log('🔄 PatientAuthService.setAuthData called');
-
-    // Get role from JWT token
+    // Get role from JWT token (which has "roles" field)
     const tokenRole = this.jwtService.getTokenRole(response.token);
     console.log('🎯 JWT Token Role:', tokenRole);
 
-    // Use the role from JWT token, fallback to provided role
-    const actualRole = tokenRole || role;
+    // Use the role from JWT token, fallback to response data, then default
+    const actualRole = tokenRole || response.admin?.role || role;
     console.log('🎯 Actual Role to store:', actualRole);
 
-    // Normalize the role
+    // Normalize the role - remove "ROLE_" prefix if present
     const normalizedRole = this.normalizeRole(actualRole);
     console.log('🎯 Normalized Role:', normalizedRole);
 
-    // Validate it's a patient role
-    const validPatientRoles = ['PATIENT', 'ROLE_PATIENT'];
-    if (!validPatientRoles.includes(normalizedRole)) {
-      console.error('❌ Invalid patient role:', normalizedRole);
-      throw new Error(`Invalid patient role: ${normalizedRole}`);
+    // Validate it's an admin role
+    const validAdminRoles = ['ADMIN', 'ROLE_ADMIN'];
+    if (!validAdminRoles.includes(normalizedRole)) {
+      console.error('❌ Invalid admin role:', normalizedRole);
+      throw new Error(`Invalid admin role: ${normalizedRole}`);
     }
 
     localStorage.setItem(this.tokenKey, response.token);
+    localStorage.setItem(this.adminKey, JSON.stringify(response));
     localStorage.setItem(this.userRoleKey, normalizedRole);
-    localStorage.setItem(this.patientKey, JSON.stringify(response));
 
     console.log('💾 Stored in localStorage:');
     console.log(
       '   - Token:',
       response.token ? `${response.token.substring(0, 30)}...` : 'NO TOKEN'
     );
-    console.log('   - Patient Data:', !!response.patient);
+    console.log('   - Admin Data:', !!response.admin);
     console.log('   - User Role:', normalizedRole);
 
     this.isAuthenticatedSubject.next(true);
@@ -135,6 +112,7 @@ export class PatientAuthService {
   }
 
   private normalizeRole(role: string): string {
+    // Convert "ROLE_ADMIN" to "ADMIN", etc.
     if (role && role.startsWith('ROLE_')) {
       return role.replace('ROLE_', '');
     }
@@ -150,12 +128,14 @@ export class PatientAuthService {
     return userRole === requiredRole;
   }
 
-  // In patient-auth.service.ts - SIMPLIFY VALIDATION
+  // Validate that current session is actually for admin
+  // In admin-auth.service.ts - SIMPLIFY VALIDATION
   validateCurrentToken(): boolean {
     const token = this.getToken();
-    const storedPatient = this.getCurrentPatient();
+    const storedAdmin = this.getCurrentAdmin();
     const storedRole = this.getUserRole();
 
-    return !!(token && storedPatient && storedRole === 'PATIENT');
+    // Basic validation - if we have token, admin data, and correct role, consider it valid
+    return !!(token && storedAdmin && storedRole === 'ADMIN');
   }
 }

@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Header } from '../../../shared/patient/header/header';
 import { AppointmentResponseDTO } from '../../../models/appointment-interface';
 import { Patient } from '../../../models/patient-interface';
-import { AppointmentService } from '../../../core/services/patient-appointment.service';
-import { PatientService } from '../../../core/services/patient.service';
+import { AppointmentService } from '../../../core/services/patient-appointment-service';
+import { PatientService } from '../../../core/services/patient-service';
 import { Sidebar } from '../../../shared/patient/sidebar/sidebar';
 
 @Component({
@@ -140,35 +140,31 @@ export class MyAppointments implements OnInit {
     this.rescheduleTime = '';
   }
 
+  // --- In my-appointments.ts ---
+
   rescheduleAppointment(): void {
     if (this.appointmentToReschedule && this.rescheduleDate && this.rescheduleTime) {
-      // For demo purposes - in real app, you would call an API
-      console.log('Rescheduling appointment:', {
-        appointmentId: this.appointmentToReschedule.appointmentId,
-        newDate: this.rescheduleDate,
-        newTime: this.rescheduleTime,
-      });
+      // 1. GET THE EXISTING DOCTOR ID
+      const existingDoctorId = this.appointmentToReschedule.doctor.doctorId; // Assuming this property exists
 
-      // Show success message and reload appointments
-      alert('Appointment rescheduled successfully!');
-      this.loadAppointments();
-      this.closeRescheduleModal();
-
-      // In a real application, you would call:
       this.appointmentService
         .updateAppointment(this.appointmentToReschedule.appointmentId, {
           appointmentDate: this.rescheduleDate,
           startTime: this.rescheduleTime.split('-')[0],
           endTime: this.rescheduleTime.split('-')[1],
-          doctorId: 0,
+
+          // 2. USE THE EXISTING DOCTOR ID (or don't send it, see option B)
+          doctorId: existingDoctorId,
         })
         .subscribe({
           next: () => {
+            alert('Appointment rescheduled successfully!');
             this.loadAppointments();
             this.closeRescheduleModal();
           },
           error: (error) => {
             console.error('Error rescheduling appointment:', error);
+            alert('Failed to reschedule appointment. Check console for details.');
           },
         });
     }

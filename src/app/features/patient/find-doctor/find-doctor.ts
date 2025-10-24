@@ -5,10 +5,10 @@ import { Router } from '@angular/router';
 import { Header } from '../../../shared/patient/header/header';
 import { Patient } from '../../../models/patient-interface';
 import { AppointmentDTO } from '../../../models/appointment-interface';
-import { PatientService } from '../../../core/services/patient.service';
+import { PatientService } from '../../../core/services/patient-service';
 import { Sidebar } from '../../../shared/patient/sidebar/sidebar';
 import { DoctorResponseDTO } from '../../../models/doctor-interface';
-import { AppointmentService } from '../../../core/services/patient-appointment.service';
+import { AppointmentService } from '../../../core/services/patient-appointment-service';
 
 @Component({
   selector: 'app-find-doctor',

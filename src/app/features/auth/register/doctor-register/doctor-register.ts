@@ -9,9 +9,9 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { DoctorAuthService } from '../../../../core/services/doctor-auth.service';
 import { AuthDoctorRequest } from '../../../../models/auth-doctor-interface';
-import { AdminService } from '../../../../core/services/admin.service';
+import { AdminService } from '../../../../core/services/admin-service';
+import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-doctor-register',
@@ -125,6 +125,18 @@ export class DoctorRegister implements OnInit {
     this.close.emit();
   }
 
+  showToastRegistration() {
+    toast.success('Registration Successful!', {
+      description: 'Your new account has been created.',
+    });
+  }
+
+  showToastRegistrationFailure() {
+    toast.error('Registration Failed', {
+      description: this.errorMessage || 'An unknown error occurred. Please try again.',
+    });
+  }
+
   onRegister(): void {
     if (this.registerForm.valid) {
       this.isLoading = true;
@@ -151,10 +163,12 @@ export class DoctorRegister implements OnInit {
           this.doctorCreated.emit();
           this.registerForm.reset();
           this.closeModal();
+          this.showToastRegistration();
         },
         error: (error) => {
           this.isLoading = false;
           this.handleRegistrationError(error);
+          this.showToastRegistrationFailure();
         },
       });
     } else {

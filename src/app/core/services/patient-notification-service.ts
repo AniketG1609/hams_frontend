@@ -21,6 +21,10 @@ export class NotificationService {
     return this.http.get<NotificationResponseDTO[]>(`${this.baseUrl}/patients/me/notifications`);
   }
 
+  // getDoctorNotifications(): Observable<NotificationResponseDTO[]> {
+  //   return this.http.get<NotificationResponseDTO[]>(`${this.baseUrl}/doctors/me/notifications`);
+  // }
+
   /**
    * Marks a single notification as read.
    * @param notificationId The ID of the notification to mark as read.
@@ -36,5 +40,9 @@ export class NotificationService {
    */
   markAllAsRead(): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/notifications/read-all`, {});
+  }
+
+  getUnreadNotificationCount(): Observable<number> {
+    return this.http.get<number>(`${this.baseUrl}/notifications/count`);
   }
 }

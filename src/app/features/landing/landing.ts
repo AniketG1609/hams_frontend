@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PatientAuthService } from '../../core/services/patient-auth.service';
-import { DoctorAuthService } from '../../core/services/doctor-auth.service';
-import { AdminAuthService } from '../../core/services/admin-auth.service';
+import { PatientAuthService } from '../../core/services/patient-auth-service';
+import { DoctorAuthService } from '../../core/services/doctor-auth-service';
+import { AdminAuthService } from '../../core/services/admin-auth-service';
 import { redirectBasedOnRole } from '../../models/redirectBasedOnRole';
 
 @Component({

@@ -1,11 +1,9 @@
 <div class="flex min-h-screen">
-  <app-sidebar></app-sidebar>
+  <app-sidebar [patient]="patient"></app-sidebar>
 
-  <!-- Main Content -->
   <main class="flex-1 p-8 bg-gray-100 overflow-y-auto">
     <app-header [patient]="patient" [notificationCount]="stats.notifications"></app-header>
 
-    <!-- Stats Cards -->
     <div class="grid gap-6 mb-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       <div
         class="bg-white p-6 rounded-xl shadow flex justify-between items-center hover:shadow-lg transition"
@@ -45,7 +43,6 @@
       </div>
     </div>
 
-    <!-- Upcoming Appointments -->
     <div class="bg-white p-6 rounded-xl shadow mb-6">
       <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
         <h2 class="text-lg font-semibold text-gray-800">Upcoming Appointments</h2>
@@ -79,11 +76,17 @@
           </span>
         </div>
         <div class="flex gap-2 mt-4">
-          <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition">
+          <button
+            (click)="viewAppointmentDetails(appointment)"
+            class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
+          >
             View Details
           </button>
-          @if (appointment.status === 'PENDING' || appointment.status === 'CONFIRMED') {
-          <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+          @if (canCancelAppointment(appointment.status)) {
+          <button
+            (click)="openCancelModal(appointment)"
+            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+          >
             Cancel
           </button>
           }
@@ -94,7 +97,6 @@
       }
     </div>
 
-    <!-- Recent Prescriptions -->
     <div class="bg-white p-6 rounded-xl shadow">
       <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
         <h2 class="text-lg font-semibold text-gray-800">Recent Prescriptions</h2>
@@ -143,3 +145,142 @@
     </div>
   </main>
 </div>
+
+@if (showCancelModal && appointmentToCancel) {
+<div
+  class="fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-xs transition-opacity duration-300 opacity-100"
+>
+  <div
+    class="bg-white rounded-xl w-full max-w-md shadow-2xl transition-transform duration-300 ease-out transform translate-y-0 scale-100"
+  >
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-xl font-semibold text-gray-800">Cancel Appointment</h3>
+      <p class="text-gray-600 mt-1">Are you sure you want to cancel this appointment?</p>
+    </div>
+
+    <div class="p-6">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex items-center gap-3">
+          <div class="text-red-600 text-lg">⚠️</div>
+          <div>
+            <p class="font-semibold text-red-800">Cancellation Notice</p>
+            <p class="text-red-700 text-sm mt-1">
+              This action cannot be undone. The doctor will be notified of the cancellation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 border-t border-gray-200 flex gap-3">
+      <button
+        (click)="closeCancelModal()"
+        class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition font-medium"
+      >
+        Keep Appointment
+      </button>
+      <button
+        (click)="cancelAppointment()"
+        class="flex-1 bg-red-600 text-white py-3 rounded-lg hover:bg-red-500 transition font-medium"
+      >
+        Cancel Appointment
+      </button>
+    </div>
+  </div>
+</div>
+} @if (showDetailsModal && selectedAppointment) {
+<div
+  class="fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-xs transition-opacity duration-300 opacity-100"
+>
+  <div class="bg-white rounded-xl w-full max-w-2xl">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <h3 class="text-xl font-semibold text-gray-800">Appointment Details</h3>
+        <button (click)="closeDetailsModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+          &times;
+        </button>
+      </div>
+    </div>
+
+    <div class="p-6 space-y-6">
+      <div class="flex items-center gap-4 p-4 bg-blue-50 rounded-lg">
+        <div
+          class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl"
+        >
+          {{ getDoctorInitials(selectedAppointment.doctor.doctorName) }}
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-800 text-lg">
+            Dr. {{ selectedAppointment.doctor.doctorName }}
+          </h4>
+          <p class="text-blue-600">{{ selectedAppointment.doctor.specialization }}</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time</label>
+            <p class="text-gray-900">
+              {{ selectedAppointment.appointmentDate | date : 'fullDate' }}<br />
+              {{ selectedAppointment.startTime }} - {{ selectedAppointment.endTime }}
+            </p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <span
+              [class]="
+                getStatusBadgeClass(selectedAppointment.status) +
+                ' px-3 py-1 rounded-full text-sm font-semibold'
+              "
+            >
+              {{ selectedAppointment.status }}
+            </span>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Experience</label>
+            <p class="text-gray-900">{{ selectedAppointment.doctor.yearOfExperience }} years</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Clinic Address</label>
+            <p class="text-gray-900">{{ selectedAppointment.doctor.clinicAddress }}</p>
+          </div>
+        </div>
+      </div>
+
+      @if (selectedAppointment.reason) {
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Visit</label>
+        <p class="text-gray-900 bg-gray-50 p-3 rounded-lg">{{ selectedAppointment.reason }}</p>
+      </div>
+      }
+
+      <div class="border-t border-gray-200 pt-4">
+        <h4 class="font-semibold text-gray-800 mb-3">Doctor Contact Information</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">📧</span>
+            <span>{{ selectedAppointment.doctor.email }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">📞</span>
+            <span>{{ selectedAppointment.doctor.contactNumber }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 border-t border-gray-200 flex justify-end">
+      <button
+        (click)="closeDetailsModal()"
+        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition font-medium"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+}

@@ -1,41 +1,60 @@
-// admin-auth.service.ts - FIXED VERSION
+// doctor-auth.service.ts - FIXED VERSION
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
+import {
+  AuthDoctorLogin,
+  AuthDoctorRequest,
+  AuthDoctorResponse,
+} from '../../models/auth-doctor-interface';
 import { Router } from '@angular/router';
-import { redirectBasedOnRole } from '../../models/redirectBasedOnRole';
-import { AuthAdminLogin, AuthAdminResponse } from '../../models/auth-admin-interface';
-import { JwtService } from './jwt.service';
+import { JwtService } from './jwt-service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AdminAuthService {
+export class DoctorAuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private jwtService = inject(JwtService);
-  private apiUrlForLogin = environment.apiUrl + environment.admin.adminLogin;
-  private tokenKey = 'authAdminToken';
-  private adminKey = 'adminData';
+  private apiUrlForRegistration = environment.apiUrl + environment.admin.doctorRegister;
+  private apiUrlForLogin = environment.apiUrl + environment.admin.doctorLogin;
+
+  private tokenKey = 'authDoctorToken';
+  private doctorKey = 'doctorData';
   private userRoleKey = 'userRole';
+
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   private userRoleSubject = new BehaviorSubject<string>(this.getUserRole());
 
-  login(loginRequest: AuthAdminLogin): Observable<AuthAdminResponse> {
-    return this.http.post<AuthAdminResponse>(`${this.apiUrlForLogin}`, loginRequest).pipe(
+  register(registerRequest: AuthDoctorRequest): Observable<AuthDoctorResponse> {
+    return this.http
+      .post<AuthDoctorResponse>(`${this.apiUrlForRegistration}`, registerRequest, {
+        responseType: 'text' as 'json',
+      })
+      .pipe(
+        tap((response) => {
+          this.setRegisteredDoctor(response, 'DOCTOR');
+        })
+      );
+  }
+
+  login(loginRequest: AuthDoctorLogin): Observable<AuthDoctorResponse> {
+    return this.http.post<AuthDoctorResponse>(`${this.apiUrlForLogin}`, loginRequest).pipe(
       tap((response) => {
         this.clearOtherAuthData(); // Clear other roles first
-        // Get role from the response admin object, not from token
-        const role = response.admin?.role || 'ADMIN';
+        // Get role from response data if available, otherwise default to DOCTOR
+        const role = 'DOCTOR'; // Assuming your doctor response has similar structure
         this.setAuthData(response, role);
+        this.isAuthenticatedSubject.next(true);
       })
     );
   }
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.adminKey);
+    localStorage.removeItem(this.doctorKey);
     localStorage.removeItem(this.userRoleKey);
     this.userRoleSubject.next('');
     this.router.navigate(['/auth/login']);
@@ -46,9 +65,9 @@ export class AdminAuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
-  getCurrentAdmin(): AuthAdminResponse | null {
-    const adminData = localStorage.getItem(this.adminKey);
-    return adminData ? (JSON.parse(adminData) as AuthAdminResponse) : null;
+  getCurrentDoctor(): AuthDoctorResponse | null {
+    const doctorData = localStorage.getItem(this.doctorKey);
+    return doctorData ? (JSON.parse(doctorData) as AuthDoctorResponse) : null;
   }
 
   getUserRole(): string {
@@ -64,55 +83,60 @@ export class AdminAuthService {
   }
 
   private clearOtherAuthData(): void {
-    // Clear patient and doctor data
+    // Clear patient and admin data
     localStorage.removeItem('authPatientToken');
     localStorage.removeItem('patientData');
-    localStorage.removeItem('authDoctorToken');
-    localStorage.removeItem('doctorData');
+    localStorage.removeItem('authAdminToken');
+    localStorage.removeItem('adminData');
     localStorage.removeItem('userRole'); // Clear generic role storage
   }
 
-  private setAuthData(response: AuthAdminResponse, role: string): void {
-    console.log('🔄 AdminAuthService.setAuthData called');
+  private setRegisteredDoctor(data: AuthDoctorResponse, role: string): void {
+    localStorage.setItem(this.doctorKey, JSON.stringify(data));
+    localStorage.setItem(this.userRoleKey, role);
+    this.isAuthenticatedSubject.next(true);
+  }
 
-    // Get role from JWT token (which has "roles" field)
+  private setAuthData(response: AuthDoctorResponse, role: string): void {
+    console.log('🔄 DoctorAuthService.setAuthData called');
+
+    // Get role from JWT token
     const tokenRole = this.jwtService.getTokenRole(response.token);
     console.log('🎯 JWT Token Role:', tokenRole);
 
-    // Use the role from JWT token, fallback to response data, then default
-    const actualRole = tokenRole || response.admin?.role || role;
+    // Use the role from JWT token, fallback to provided role
+    const actualRole = tokenRole || role;
     console.log('🎯 Actual Role to store:', actualRole);
 
-    // Normalize the role - remove "ROLE_" prefix if present
+    // Normalize the role
     const normalizedRole = this.normalizeRole(actualRole);
     console.log('🎯 Normalized Role:', normalizedRole);
 
-    // Validate it's an admin role
-    const validAdminRoles = ['ADMIN', 'ROLE_ADMIN'];
-    if (!validAdminRoles.includes(normalizedRole)) {
-      console.error('❌ Invalid admin role:', normalizedRole);
-      throw new Error(`Invalid admin role: ${normalizedRole}`);
+    // Validate it's a doctor role
+    const validDoctorRoles = ['DOCTOR', 'ROLE_DOCTOR'];
+    if (!validDoctorRoles.includes(normalizedRole)) {
+      console.error('❌ Invalid doctor role:', normalizedRole);
+      throw new Error(`Invalid doctor role: ${normalizedRole}`);
     }
 
     localStorage.setItem(this.tokenKey, response.token);
-    localStorage.setItem(this.adminKey, JSON.stringify(response));
     localStorage.setItem(this.userRoleKey, normalizedRole);
+    localStorage.setItem(this.doctorKey, JSON.stringify(response));
 
     console.log('💾 Stored in localStorage:');
     console.log(
       '   - Token:',
       response.token ? `${response.token.substring(0, 30)}...` : 'NO TOKEN'
     );
-    console.log('   - Admin Data:', !!response.admin);
+    console.log('   - Doctor Data:', !!response.doctor);
     console.log('   - User Role:', normalizedRole);
 
-    this.isAuthenticatedSubject.next(true);
     this.userRoleSubject.next(normalizedRole);
+    this.isAuthenticatedSubject.next(true);
     // redirectBasedOnRole(this.router, normalizedRole);
   }
 
   private normalizeRole(role: string): string {
-    // Convert "ROLE_ADMIN" to "ADMIN", etc.
     if (role && role.startsWith('ROLE_')) {
       return role.replace('ROLE_', '');
     }
@@ -128,14 +152,12 @@ export class AdminAuthService {
     return userRole === requiredRole;
   }
 
-  // Validate that current session is actually for admin
-  // In admin-auth.service.ts - SIMPLIFY VALIDATION
+  // In doctor-auth.service.ts - SIMPLIFY VALIDATION
   validateCurrentToken(): boolean {
     const token = this.getToken();
-    const storedAdmin = this.getCurrentAdmin();
+    const storedDoctor = this.getCurrentDoctor();
     const storedRole = this.getUserRole();
 
-    // Basic validation - if we have token, admin data, and correct role, consider it valid
-    return !!(token && storedAdmin && storedRole === 'ADMIN');
+    return !!(token && storedDoctor && storedRole === 'DOCTOR');
   }
 }

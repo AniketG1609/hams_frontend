@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Header } from '../../../shared/patient/header/header';
 import { MedicalRecordResponseDTO } from '../../../models/medicalrecord-interface';
 import { Patient } from '../../../models/patient-interface';
-import { PatientService } from '../../../core/services/patient.service';
+import { PatientService } from '../../../core/services/patient-service';
 import { Sidebar } from '../../../shared/patient/sidebar/sidebar';
-import { MedicalRecordService } from '../../../core/services/medical-record.service';
+import { MedicalRecordService } from '../../../core/services/medical-record-service';
 
 @Component({
   selector: 'app-medical-records',

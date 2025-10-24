@@ -66,180 +66,164 @@
       </div>
     </div>
 
-    <div class="flex border-b border-gray-200 mb-6">
-      <button
-        class="px-6 py-3 text-lg font-medium transition duration-150 ease-in-out"
-        [ngClass]="{
-          'border-b-4 border-blue-600 text-blue-600': currentTab === 'slots',
-          'text-gray-500 hover:text-gray-700': currentTab !== 'slots'
-        }"
-        (click)="switchTab('slots')"
-      >
-        Scheduled Slots
-      </button>
-      <button
-        class="px-6 py-3 text-lg font-medium transition duration-150 ease-in-out"
-        [ngClass]="{
-          'border-b-4 border-blue-600 text-blue-600': currentTab === 'add',
-          'text-gray-500 hover:text-gray-700': currentTab !== 'add'
-        }"
-        (click)="switchTab('add')"
-      >
-        Add New Slot
-      </button>
-    </div>
-
-    @if (currentTab === 'slots') {
-    <div class="bg-white shadow-xl rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-4 border-b pb-2">Recurring Availability</h2>
-      <div *ngIf="scheduledSlots.length === 0" class="text-center py-10 text-gray-500">
-        <div class="text-6xl mb-3">🗓️</div>
-        <h3 class="text-lg font-semibold">No recurring slots found.</h3>
-        <p>Add your weekly schedule in the 'Add New Slot' tab.</p>
+    <div class="availability-management">
+      <div class="tabs">
+        <button
+          class="btn"
+          [class.btn-active]="currentTab === 'slots'"
+          (click)="switchTab('slots')"
+        >
+          Scheduled Slots
+        </button>
+        <button class="btn" [class.btn-active]="currentTab === 'add'" (click)="switchTab('add')">
+          {{ isEditMode ? 'Edit Slot' : 'Add Availability' }}
+        </button>
       </div>
 
-      <table
-        *ngIf="scheduledSlots.length > 0"
-        class="min-w-full divide-y divide-gray-200 patients-table"
-      >
-        <thead class="bg-gray-50">
-          <tr>
-            <th
-              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Day
-            </th>
-            <th
-              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Start Time
-            </th>
-            <th
-              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              End Time
-            </th>
-            <th
-              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Duration
-            </th>
-            <th
-              class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          @for (slot of scheduledSlots; track $index) {
-          <tr>
-            <td class="px-4 py-4 whitespace-nowrap font-medium text-gray-900">{{ slot.day }}</td>
-            <td class="px-4 py-4 whitespace-nowrap">{{ slot.startTime }}</td>
-            <td class="px-4 py-4 whitespace-nowrap">{{ slot.endTime }}</td>
-            <td class="px-4 py-4 whitespace-nowrap">{{ slot.duration }} mins</td>
-            <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <button (click)="editSlot(slot)" class="text-blue-600 hover:text-blue-900 mr-4">
-                Edit
-              </button>
-              <button (click)="deleteSlot(slot.id)" class="text-red-600 hover:text-red-900">
-                Delete
-              </button>
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-    } @if (currentTab === 'add') {
-    <div class="bg-white shadow-xl rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-6 border-b pb-2">Add Recurring Weekly Availability</h2>
+      @if (currentTab === 'add') {
+      <div class="add-slot-form bg-white p-6 rounded-lg shadow mt-4">
+        <h3 class="text-xl font-medium mb-4">
+          {{ isEditMode ? 'Edit Slot' : 'Add New Availability' }}
+        </h3>
 
-      <form (ngSubmit)="saveNewSlot()">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label for="day" class="block text-sm font-medium text-gray-700 mb-1"
-              >Day of the Week</label
+        <div class="grid grid-cols-3 gap-4">
+          <div class="form-group">
+            <label for="availableDate" class="block text-sm font-medium text-gray-700">Date</label>
+            <input
+              id="availableDate"
+              type="date"
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              [(ngModel)]="newSlot.availableDate"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="startTime" class="block text-sm font-medium text-gray-700"
+              >Start Time</label
             >
             <select
-              id="day"
-              [(ngModel)]="newSlot.day"
-              name="day"
+              id="startTime"
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              [(ngModel)]="newSlot.startTime"
               required
-              class="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             >
-              <option value="" disabled>Select a Day</option>
-              @for (day of daysOfWeek; track $index) {
-              <option [value]="day">{{ day }}</option>
+              @for (time of timeOptions; track $index) {
+              <option [value]="time">{{ time }}</option>
               }
             </select>
           </div>
 
-          <div>
-            <label for="startTime" class="block text-sm font-medium text-gray-700 mb-1"
-              >Start Time</label
-            >
-            <input
-              type="time"
-              id="startTime"
-              [(ngModel)]="newSlot.startTime"
-              name="startTime"
-              required
-              class="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
-          </div>
-
-          <div>
-            <label for="endTime" class="block text-sm font-medium text-gray-700 mb-1"
-              >End Time</label
-            >
-            <input
-              type="time"
-              id="endTime"
-              [(ngModel)]="newSlot.endTime"
-              name="endTime"
-              required
-              class="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
-          </div>
-
-          <div>
-            <label for="duration" class="block text-sm font-medium text-gray-700 mb-1"
-              >Appointment Duration (Minutes)</label
-            >
+          <div class="form-group">
+            <label for="endTime" class="block text-sm font-medium text-gray-700">End Time</label>
             <select
-              id="duration"
-              [(ngModel)]="newSlot.duration"
-              name="duration"
+              id="endTime"
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              [(ngModel)]="newSlot.endTime"
               required
-              class="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             >
-              <option value="" disabled>Select Duration</option>
-              <option value="15">15 Minutes</option>
-              <option value="30">30 Minutes</option>
-              <option value="45">45 Minutes</option>
-              <option value="60">60 Minutes</option>
+              @for (time of timeOptions; track $index) {
+              <option [value]="time">{{ time }}</option>
+              }
             </select>
           </div>
         </div>
 
-        <div class="mt-8">
+        <p class="text-sm text-gray-600 mt-4 p-3 bg-yellow-50 border-l-4 border-yellow-500">
+          **Appointment duration is fixed at 30 minutes.** Please note: No availability can be set
+          between **12:30** and **13:30** (Doctor's Break).
+        </p>
+
+        <div class="mt-6 flex space-x-3">
           <button
-            type="submit"
-            class="px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+            class="px-4 py-2 text-white font-medium rounded-md shadow-sm bg-blue-600 hover:bg-blue-700 transition"
+            (click)="saveNewSlot()"
+            [disabled]="!isTimeValid()"
           >
-            {{ isEditMode ? 'Update Slot' : 'Save Availability' }}
+            {{ isEditMode ? 'Update Slot' : 'Save Slot' }}
           </button>
           <button
-            type="button"
-            (click)="resetForm()"
-            class="ml-3 px-6 py-2 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-150"
+            class="px-4 py-2 text-gray-700 font-medium rounded-md border border-gray-300 bg-white hover:bg-gray-50 transition"
+            (click)="resetForm(); switchTab('slots')"
           >
-            {{ isEditMode ? 'Cancel Edit' : 'Clear' }}
+            Cancel
           </button>
         </div>
-      </form>
+      </div>
+      } @if (currentTab === 'slots') {
+      <div class="scheduled-slots bg-white p-6 rounded-lg shadow mt-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-medium">Current Schedule</h3>
+          <button
+            class="px-3 py-1 text-sm text-white font-medium rounded-md shadow-sm bg-green-600 hover:bg-green-700 transition"
+            (click)="switchTab('add'); resetForm()"
+          >
+            + Add New Schedule
+          </button>
+        </div>
+
+        @if (scheduledSlots.length > 0) {
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Date
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Start Time
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                End Time
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            @for (slot of scheduledSlots; track trackByAvailabilityId($index, slot)) {
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ slot.availableDate | date }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ slot.startTime }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ slot.endTime }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button class="text-indigo-600 hover:text-indigo-900 mr-3" (click)="editSlot(slot)">
+                  Edit
+                </button>
+                <button
+                  class="text-red-600 hover:text-red-900"
+                  (click)="deleteSlot(slot.availabilityId)"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+        } @else {
+        <p class="p-4 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+          No availability slots scheduled yet.
+        </p>
+        }
+      </div>
+      }
     </div>
-    }
   </main>
 </body>

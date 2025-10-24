@@ -1,9 +1,9 @@
 // services/auth-manager.service.ts
 import { Injectable, inject } from '@angular/core';
-import { PatientAuthService } from './patient-auth.service';
-import { DoctorAuthService } from './doctor-auth.service';
-import { AdminAuthService } from './admin-auth.service';
-import { JwtService } from './jwt.service';
+import { PatientAuthService } from './patient-auth-service';
+import { DoctorAuthService } from './doctor-auth-service';
+import { AdminAuthService } from './admin-auth-service';
+import { JwtService } from './jwt-service';
 
 @Injectable({
   providedIn: 'root',

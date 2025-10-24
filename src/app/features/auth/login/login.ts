@@ -3,14 +3,15 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { PatientAuthService } from '../../../core/services/patient-auth.service';
+import { PatientAuthService } from '../../../core/services/patient-auth-service';
 import { AuthPatientLogin } from '../../../models/auth-patient-interface';
 import { Observable } from 'rxjs';
-import { DoctorAuthService } from '../../../core/services/doctor-auth.service';
-import { AdminAuthService } from '../../../core/services/admin-auth.service';
+import { DoctorAuthService } from '../../../core/services/doctor-auth-service';
+import { AdminAuthService } from '../../../core/services/admin-auth-service';
 import { AuthDoctorLogin } from '../../../models/auth-doctor-interface';
 import { AuthAdminLogin } from '../../../models/auth-admin-interface';
-import { AuthManagerService } from '../../../core/services/auth-manager.service';
+import { AuthManagerService } from '../../../core/services/auth-manager-service';
+import { toast } from 'ngx-sonner';
 
 type LoginMode = 'patient' | 'doctor' | 'admin';
 
@@ -98,6 +99,18 @@ export class Login implements OnInit {
     this.loginForm.reset();
   }
 
+  showToastLogin() {
+    toast.success('Welcome Back!', {
+      description: 'You have successfully logged in.',
+    });
+  }
+
+  showToastError() {
+    toast.error('Something went wrong', {
+      description: 'There was a problem with your request.',
+    });
+  }
+
   onLogin(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
@@ -149,6 +162,7 @@ export class Login implements OnInit {
               console.log('✅ Role matches - redirecting to dashboard');
               // Use replaceUrl to prevent back navigation to login
               this.router.navigate([`/${this.loginMode}/dashboard`], { replaceUrl: true });
+              this.showToastLogin();
             } else {
               this.errorMessage = `Authentication successful but role issue. Expected ${this.loginMode.toUpperCase()}, got ${actualRole}.`;
               console.error('❌ Role mismatch after login - clearing session');
@@ -158,6 +172,7 @@ export class Login implements OnInit {
 
               // Clear the invalid session
               this.authManager.prepareForLogin();
+              this.showToastError();
             }
           }, 100);
         },

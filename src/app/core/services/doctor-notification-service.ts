@@ -21,7 +21,11 @@ export class DoctorNotificationService {
   }
 
   markAllAsRead(): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/doctors/me/notifications/read-all`, {});
+    return this.http.put<void>(`${this.baseUrl}/notifications/read-all`, {});
+  }
+
+  getUnreadNotificationCount(): Observable<number> {
+    return this.http.get<number>(`${this.baseUrl}/notifications/count`);
   }
 
   private getMockNotifications(): NotificationResponseDTO[] {

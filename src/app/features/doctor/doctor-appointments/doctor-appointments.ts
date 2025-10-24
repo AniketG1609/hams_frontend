@@ -3,7 +3,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { AppointmentService } from '../../../core/services/doctor-appointment.service.js';
+import { AppointmentService } from '../../../core/services/doctor-appointment-service.js';
 
 interface Patient {
   name: string;

@@ -120,8 +120,12 @@
 
 <!-- Cancel Appointment Modal -->
 @if (showCancelModal && appointmentToCancel) {
-<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-xl w-full max-w-md">
+<div
+  class="fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-xs transition-opacity duration-300 opacity-100"
+>
+  <div
+    class="bg-white rounded-xl w-full max-w-md shadow-2xl transition-transform duration-300 ease-out transform translate-y-0 scale-100"
+  >
     <div class="p-6 border-b border-gray-200">
       <h3 class="text-xl font-semibold text-gray-800">Cancel Appointment</h3>
       <p class="text-gray-600 mt-1">Are you sure you want to cancel this appointment?</p>
@@ -161,99 +165,131 @@
 
 <!-- View Appointment Details Modal -->
 @if (showDetailsModal && selectedAppointment) {
-<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-xl w-full max-w-2xl">
-    <div class="p-6 border-b border-gray-200">
-      <div class="flex justify-between items-center">
-        <h3 class="text-xl font-semibold text-gray-800">Appointment Details</h3>
-        <button (click)="closeDetailsModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
-          &times;
-        </button>
-      </div>
+<div
+  class="fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity duration-300 opacity-100 overflow-y-auto"
+>
+  <div
+    class="bg-white rounded-2xl w-full max-w-3xl shadow-2xl transform transition-all duration-300 scale-100 max-h-[90vh] overflow-y-auto"
+  >
+    <div
+      class="p-6 border-b border-gray-100 bg-gray-50 rounded-t-2xl flex justify-between items-center shadow-sm sticky top-0 z-10"
+    >
+      <h3 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
+        <span class="text-blue-600">📄</span> Appointment Details
+      </h3>
+      <button
+        (click)="closeDetailsModal()"
+        class="text-gray-500 hover:text-red-500 transition-colors duration-200 text-3xl p-1 leading-none"
+        aria-label="Close modal"
+      >
+        &times;
+      </button>
     </div>
 
-    <div class="p-6 space-y-6">
-      <!-- Doctor Information -->
-      <div class="flex items-center gap-4 p-4 bg-blue-50 rounded-lg">
+    <div class="p-8 space-y-8">
+      <div
+        class="flex items-center gap-5 p-5 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl shadow-md"
+      >
         <div
-          class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl"
+          class="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-700 rounded-full flex items-center justify-center text-white font-bold text-xl ring-4 ring-blue-300"
         >
           {{ getDoctorInitials(selectedAppointment.doctor.doctorName) }}
         </div>
         <div>
-          <h4 class="font-semibold text-gray-800 text-lg">
+          <h4 class="font-bold text-gray-900 text-xl">
             Dr. {{ selectedAppointment.doctor.doctorName }}
           </h4>
-          <p class="text-blue-600">{{ selectedAppointment.doctor.specialization }}</p>
+          <p class="text-blue-700 font-semibold">{{ selectedAppointment.doctor.specialization }}</p>
           <p class="text-gray-600 text-sm mt-1">
-            License: {{ selectedAppointment.doctor.licenseNumber }}
+            License: <span class="font-mono">{{ selectedAppointment.doctor.licenseNumber }}</span>
           </p>
         </div>
       </div>
 
-      <!-- Appointment Details -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time</label>
-            <p class="text-gray-900">
-              {{ selectedAppointment.appointmentDate | date : 'fullDate' }}<br />
-              {{ selectedAppointment.startTime }} - {{ selectedAppointment.endTime }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <span
-              [class]="
-                getStatusBadgeClass(selectedAppointment.status) +
-                ' px-3 py-1 rounded-full text-sm font-semibold'
-              "
-            >
-              {{ selectedAppointment.status }}
-            </span>
-          </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1"
+            >Date & Time</label
+          >
+          <p class="text-gray-900 font-medium text-lg">
+            {{ selectedAppointment.appointmentDate | date : 'fullDate' }}
+          </p>
+          <p class="text-gray-700 text-md mt-1">
+            {{ selectedAppointment.startTime }} - {{ selectedAppointment.endTime }}
+          </p>
         </div>
 
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Consultation Fee</label>
-            <p class="text-gray-900">${{ selectedAppointment.doctor.consultationFee }}</p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Clinic Address</label>
-            <p class="text-gray-900">{{ selectedAppointment.doctor.address }}</p>
-          </div>
+        <div class="p-4 rounded-lg border border-gray-200">
+          <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1"
+            >Status</label
+          >
+          <span
+            [class]="
+              getStatusBadgeClass(selectedAppointment.status) +
+              ' px-4 py-1.5 rounded-full text-sm font-bold shadow-sm inline-block mt-1'
+            "
+          >
+            {{ selectedAppointment.status }}
+          </span>
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1"
+            >Experience</label
+          >
+          <p class="text-green-700 font-bold text-xl">
+            ${{ selectedAppointment.doctor.yearOfExperience }}
+          </p>
         </div>
       </div>
 
-      <!-- Reason -->
       @if (selectedAppointment.reason) {
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Visit</label>
-        <p class="text-gray-900 bg-gray-50 p-3 rounded-lg">{{ selectedAppointment.reason }}</p>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Reason for Visit</label>
+        <p
+          class="text-gray-800 bg-gray-100 p-4 rounded-xl border border-gray-200 italic leading-relaxed"
+        >
+          {{ selectedAppointment.reason }}
+        </p>
       </div>
       }
 
-      <!-- Doctor Contact -->
-      <div class="border-t border-gray-200 pt-4">
-        <h4 class="font-semibold text-gray-800 mb-3">Doctor Contact Information</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div class="flex items-center gap-2">
-            <span class="text-gray-500">📧</span>
-            <span>{{ selectedAppointment.doctor.email }}</span>
+      <div class="border-t border-gray-200 pt-6 space-y-4">
+        <h4 class="font-bold text-lg text-gray-800">Clinic & Contact Information</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-md">
+          <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <span class="text-blue-600 text-xl">📧</span>
+            <div class="flex flex-col">
+              <span class="text-gray-500 text-xs font-medium">Email</span>
+              <span class="text-gray-800">{{ selectedAppointment.doctor.email }}</span>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="text-gray-500">📞</span>
-            <span>{{ selectedAppointment.doctor.contactNumber }}</span>
+          <div class="flex items-center gap-3 p-3 rounded-lg border border-gray-200">
+            <span class="text-blue-600 text-xl">📞</span>
+            <div class="flex flex-col">
+              <span class="text-gray-500 text-xs font-medium">Phone</span>
+              <span class="text-gray-800">{{ selectedAppointment.doctor.contactNumber }}</span>
+            </div>
+          </div>
+          <div
+            class="md:col-span-2 flex items-start gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200"
+          >
+            <span class="text-blue-600 text-xl pt-1">📍</span>
+            <div class="flex flex-col">
+              <span class="text-gray-500 text-xs font-medium">Clinic Address</span>
+              <span class="text-gray-800">{{ selectedAppointment.doctor.clinicAddress }}</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="p-6 border-t border-gray-200 flex justify-end">
+    <div
+      class="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex justify-end sticky bottom-0 z-10"
+    >
       <button
         (click)="closeDetailsModal()"
-        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition font-medium"
+        class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition font-bold shadow-lg shadow-blue-300/50 hover:shadow-xl"
       >
         Close
       </button>

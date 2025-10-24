@@ -77,6 +77,14 @@ export const routes: Routes = [
           import('./features/patient/medical-record/medical-record').then((m) => m.MedicalRecord),
         title: 'Medical Records',
       },
+      {
+        path: 'patient-profile',
+        loadComponent: () =>
+          import('./features/patient/patient-profile/patient-profile').then(
+            (m) => m.PatientProfile
+          ),
+        title: 'Medical Records',
+      },
       // Add other patient sub-routes here
     ],
   },

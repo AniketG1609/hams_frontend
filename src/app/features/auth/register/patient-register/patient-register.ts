@@ -6,10 +6,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { PatientAuthService } from '../../../../core/services/patient-auth.service';
+import { PatientAuthService } from '../../../../core/services/patient-auth-service';
 import { Router, RouterLink } from '@angular/router';
 import { AuthPatientRequest } from '../../../../models/auth-patient-interface';
 import { CommonModule } from '@angular/common'; // Import CommonModule for *ngIf
+import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-patient-register',
@@ -83,6 +84,18 @@ export class PatientRegister {
     this.showConfirm = !this.showConfirm;
   }
 
+  showToastRegistration() {
+    toast.success('Registration Successful!', {
+      description: 'Your new account has been created.',
+    });
+  }
+
+  showToastRegistrationFailure() {
+    toast.error('Registration Failed', {
+      description: this.errorMessage || 'An unknown error occurred. Please try again.',
+    });
+  }
+
   // Renamed to onSubmit to match common convention, but you can use onRegister
   onRegister(): void {
     if (this.registerForm.valid) {
@@ -106,11 +119,13 @@ export class PatientRegister {
         next: () => {
           this.isLoading = false;
           this.router.navigate(['/auth/login']);
+          this.showToastRegistration();
         },
         error: (error) => {
           this.isLoading = false;
           this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
           console.error('Registration error:', error);
+          this.showToastRegistrationFailure();
         },
       });
     } else {

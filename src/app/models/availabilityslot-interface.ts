@@ -1,7 +1,13 @@
 export interface AvailabilitySlot {
-  id: number;
-  day: string;
+  availabilityId: number;
+  availableDate?: string;
   startTime: string;
   endTime: string;
-  duration: number;
+}
+
+export interface DoctorAvailabilityPayload {
+  availableDate: string;
+  startTime: string;
+  endTime: string;
+  availabilityId: number;
 }

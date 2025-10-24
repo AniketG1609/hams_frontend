@@ -4,8 +4,7 @@ export interface DoctorResponseDTO {
   specialization: string;
   contactNumber: string;
   email: string;
-  address: string;
-  licenseNumber: string;
-  yearsOfExperience: number;
-  consultationFee: number;
+  clinicAddress: string;
+  yearOfExperience: number;
+  qualification: string;
 }

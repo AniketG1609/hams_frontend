@@ -56,6 +56,4 @@ export class DoctorPatientService {
       )
     );
   }
-
-  // The private getMockPatients() method has been removed.
 }

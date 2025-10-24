@@ -1,10 +1,10 @@
 // jwt.interceptor.ts - FIXED VERSION
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { PatientAuthService } from '../services/patient-auth.service';
-import { DoctorAuthService } from '../services/doctor-auth.service';
-import { AdminAuthService } from '../services/admin-auth.service';
-import { JwtService } from '../services/jwt.service';
+import { PatientAuthService } from '../services/patient-auth-service';
+import { DoctorAuthService } from '../services/doctor-auth-service';
+import { AdminAuthService } from '../services/admin-auth-service';
+import { JwtService } from '../services/jwt-service';
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   // Check all auth services for tokens

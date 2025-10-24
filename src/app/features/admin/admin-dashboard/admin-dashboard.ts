@@ -4,8 +4,9 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { DoctorRegister } from '../../auth/register/doctor-register/doctor-register';
-import { AdminService, Doctor, DoctorUpdateRequest } from '../../../core/services/admin.service';
-import { AdminAuthService } from '../../../core/services/admin-auth.service';
+import { AdminService, Doctor, DoctorUpdateRequest } from '../../../core/services/admin-service';
+import { AdminAuthService } from '../../../core/services/admin-auth-service';
+import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -188,6 +189,12 @@ export class AdminDashboard implements OnInit {
     this.isUpdating = false;
   }
 
+  showToastDoctorUpdateSuccess(doctorName: string) {
+    toast.success('Profile Updated Successfully', {
+      description: 'The changes for Dr. ' + doctorName + ' have been saved.',
+    });
+  }
+
   onUpdateDoctor() {
     if (this.updateDoctorForm.valid && this.selectedDoctor) {
       this.isUpdating = true;
@@ -206,6 +213,10 @@ export class AdminDashboard implements OnInit {
         next: (response) => {
           this.isUpdating = false;
           console.log('✅ Doctor updated successfully:', response);
+
+          const doctorName = this.selectedDoctor?.doctorName ?? 'Doctor';
+          this.showToastDoctorUpdateSuccess(doctorName);
+
           this.closeUpdateDoctor();
           // Refresh the doctors list to show updated data
           this.loadDashboardData();
@@ -225,12 +236,22 @@ export class AdminDashboard implements OnInit {
     }
   }
 
+  showToastDeleteDoctor(doctorName: string) {
+    toast.success('Deletion Successful', {
+      description:
+        'Dr. ' + doctorName + ' and all associated records have been removed from the system.',
+    });
+  }
+
   deleteDoctor(doctorId: number) {
+    const doctorToDelete = this.recentDoctors.find((d) => (d.doctorId ?? d.id) === doctorId);
+    const doctorName = doctorToDelete ? doctorToDelete.doctorName : 'Doctor';
     console.log('🗑️ Attempting to delete doctor with ID:', doctorId);
     this.adminService.deleteDoctor(doctorId).subscribe({
       next: (response) => {
         console.log('✅ Doctor deleted successfully:', response);
         // Refresh the doctors list to show updated data
+        this.showToastDeleteDoctor(doctorName);
         this.loadDashboardData();
       },
       error: (error) => {
@@ -239,6 +260,9 @@ export class AdminDashboard implements OnInit {
           status: error.status,
           message: error.message,
           doctorId: doctorId,
+        });
+        toast.error('Deletion Failed', {
+          description: `Could not delete Dr. ${doctorName}. Please check the server status.`,
         });
       },
     });
@@ -285,9 +309,15 @@ export class AdminDashboard implements OnInit {
       },
     });
   }
+  showToastAdminLogout() {
+    toast.success('Logged Out', {
+      description: 'You have securely signed out of the Admin Dashboard.',
+    });
+  }
 
   logout() {
     this.adminAuthService.logout();
+    this.showToastAdminLogout();
   }
 
   formatDate(dateString: string): string {

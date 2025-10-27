@@ -34,26 +34,21 @@
             >⏰ Availability</a
           >
         </li>
+
         <li>
           <a
-            [routerLink]="['/doctor/prescriptions']"
-            class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
-            >💊 Prescriptions</a
-          >
-        </li>
-        <li>
-          <a
-            [routerLink]="['/doctor/medical-records']"
+            [routerLink]="['/doctor/medical-record']"
             class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
             >📋 Medical Records</a
           >
         </li>
         <li>
-          <a
-            [routerLink]="['/doctor/settings']"
-            class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
-            >⚙️ Settings</a
+          <button
+            (click)="logout()"
+            class="flex items-center gap-3 px-6 py-3 font-medium text-red-600 hover:bg-gray-100 hover:border-l-4 hover:border-red-600 rounded-l w-full text-left"
           >
+            🚪 Logout
+          </button>
         </li>
       </ul>
     </aside>
@@ -79,16 +74,13 @@
             <input
               type="text"
               placeholder="Search by patient name..."
-              id="search-input"
               [(ngModel)]="searchTerm"
               (input)="filterAppointments()"
               class="w-full border-2 border-gray-300 rounded-lg py-2 px-10 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition"
             />
           </div>
 
-          <!-- Date Filter -->
           <select
-            id="date-filter"
             [(ngModel)]="dateFilter"
             (change)="filterAppointments()"
             class="border-2 border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition"
@@ -100,9 +92,7 @@
             <option value="month">This Month</option>
           </select>
 
-          <!-- Status Filter -->
           <select
-            id="status-filter"
             [(ngModel)]="statusFilter"
             (change)="filterAppointments()"
             class="border-2 border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition"
@@ -123,7 +113,7 @@
         >
           <div>
             <h3 class="text-gray-500 text-sm font-medium">Today's Appointments</h3>
-            <p id="today-count" class="text-2xl font-bold text-gray-800">{{ todayCount() }}</p>
+            <p class="text-2xl font-bold text-gray-800">{{ todayCount() }}</p>
           </div>
           <div class="text-3xl">📅</div>
         </div>
@@ -132,7 +122,7 @@
         >
           <div>
             <h3 class="text-gray-500 text-sm font-medium">Pending</h3>
-            <p id="pending-count" class="text-2xl font-bold text-gray-800">{{ pendingCount() }}</p>
+            <p class="text-2xl font-bold text-gray-800">{{ pendingCount() }}</p>
           </div>
           <div class="text-3xl">⏳</div>
         </div>
@@ -141,9 +131,7 @@
         >
           <div>
             <h3 class="text-gray-500 text-sm font-medium">Confirmed</h3>
-            <p id="confirmed-count" class="text-2xl font-bold text-gray-800">
-              {{ confirmedCount() }}
-            </p>
+            <p class="text-2xl font-bold text-gray-800">{{ confirmedCount() }}</p>
           </div>
           <div class="text-3xl">✅</div>
         </div>
@@ -152,9 +140,7 @@
         >
           <div>
             <h3 class="text-gray-500 text-sm font-medium">Completed</h3>
-            <p id="completed-count" class="text-2xl font-bold text-gray-800">
-              {{ completedCount() }}
-            </p>
+            <p class="text-2xl font-bold text-gray-800">{{ completedCount() }}</p>
           </div>
           <div class="text-3xl">✔️</div>
         </div>
@@ -214,7 +200,7 @@
       }
 
       <!-- Appointments List -->
-      <div class="grid gap-4" id="appointments-list">
+      <div class="grid gap-4">
         @for (appointment of filteredAppointments(); track appointment.appointmentId) {
         <div
           class="bg-white p-6 rounded-xl shadow flex justify-between items-start transition hover:shadow-md"
@@ -270,6 +256,12 @@
                 Start Consultation
               </button>
               <button
+                (click)="openRescheduleModal(appointment)"
+                class="bg-purple-500 text-white px-3 py-1 text-sm rounded hover:bg-purple-600 transition"
+              >
+                Reschedule
+              </button>
+              <button
                 (click)="cancelAppointment(appointment.appointmentId)"
                 class="bg-red-500 text-white px-3 py-1 text-sm rounded hover:bg-red-600 transition"
               >
@@ -295,72 +287,210 @@
     </main>
   </div>
 
-  <!-- Modals -->
-  <!-- Details Modal -->
+  <!-- Consultation Notes Modal -->
   <div
     class="fixed inset-0 bg-black/50 items-center justify-center z-50"
     [ngClass]="{ hidden: !isNotesModalOpen(), flex: isNotesModalOpen() }"
-    id="notes-modal"
   >
-    <div class="bg-white rounded-2xl p-6 max-w-lg w-11/12 max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl p-6 max-w-2xl w-11/12 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-gray-200 pb-4 mb-4">
-        <h2 class="text-xl font-bold text-gray-800">Add Consultation Notes</h2>
-        <button class="text-gray-500 text-2xl" (click)="isNotesModalOpen.set(false)">×</button>
+        <h2 class="text-xl font-bold text-gray-800">Complete Consultation</h2>
+        <button
+          class="text-gray-500 text-2xl hover:text-gray-700"
+          (click)="isNotesModalOpen.set(false)"
+        >
+          ×
+        </button>
       </div>
       <form (ngSubmit)="saveNotes()" class="space-y-4">
         <div>
-          <label class="block text-gray-700 font-semibold mb-1">Diagnosis</label>
+          <label class="block text-gray-700 font-semibold mb-1">
+            Diagnosis <span class="text-red-500">*</span>
+          </label>
           <input
             type="text"
             [(ngModel)]="consultationNotes.diagnosis"
             name="diagnosis"
             required
-            class="w-full border-2 border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500"
+            placeholder="e.g., Common Cold, Hypertension..."
+            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
+
         <div>
           <label class="block text-gray-700 font-semibold mb-1">Symptoms</label>
           <input
             type="text"
             [(ngModel)]="consultationNotes.symptoms"
             name="symptoms"
-            class="w-full border-2 border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500"
+            placeholder="e.g., Fever, Cough, Headache..."
+            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
+          <p class="text-xs text-gray-500 mt-1">
+            Will be used as prescription instructions if medications are prescribed
+          </p>
         </div>
+
         <div>
-          <label class="block text-gray-700 font-semibold mb-1">Notes</label>
+          <label class="block text-gray-700 font-semibold mb-1">Clinical Notes</label>
           <textarea
             [(ngModel)]="consultationNotes.notes"
             name="notes"
-            placeholder="Enter consultation notes..."
-            class="w-full border-2 border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 min-h-[100px]"
+            placeholder="Enter detailed consultation notes, observations, treatment plan..."
+            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[120px]"
           ></textarea>
         </div>
+
         <div>
-          <label class="block text-gray-700 font-semibold mb-1">Prescription</label>
+          <label class="block text-gray-700 font-semibold mb-1">Prescription / Medications</label>
           <textarea
             [(ngModel)]="consultationNotes.prescription"
             name="prescription"
-            placeholder="Enter prescribed medications..."
-            class="w-full border-2 border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 min-h-[100px]"
+            placeholder="Enter prescribed medications (e.g., Paracetamol 500mg, Amoxicillin 250mg...)"
+            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
           ></textarea>
+          <p class="text-xs text-gray-500 mt-1">
+            Optional: Leave empty if no medications prescribed
+          </p>
         </div>
-        <div class="flex gap-4">
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p class="text-sm text-gray-700"><strong>Note:</strong> Saving this form will:</p>
+          <ul class="text-sm text-gray-600 mt-2 space-y-1 list-disc list-inside">
+            <li>Create a medical record for the patient</li>
+            <li>Mark the appointment as COMPLETED</li>
+            <li>Make the record visible to both you and the patient</li>
+          </ul>
+        </div>
+
+        <div class="flex gap-4 pt-4">
           <button
             type="submit"
-            class="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-2 rounded-lg hover:shadow-lg hover:-translate-y-1 transition"
+            [disabled]="!consultationNotes.diagnosis"
+            [class.opacity-50]="!consultationNotes.diagnosis"
+            [class.cursor-not-allowed]="!consultationNotes.diagnosis"
+            class="flex-1 bg-linear-to-r from-blue-500 to-purple-600 text-white font-semibold py-3 rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition disabled:hover:shadow-none disabled:hover:translate-y-0"
           >
-            Save Notes
+            💾 Complete Consultation
           </button>
           <button
             type="button"
             (click)="isNotesModalOpen.set(false)"
-            class="flex-1 bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg hover:bg-gray-300 transition"
+            class="flex-1 bg-gray-200 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-300 transition"
           >
             Cancel
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Reschedule Modal -->
+  <div
+    class="fixed inset-0 bg-black/50 items-center justify-center z-50 overflow-y-auto p-4"
+    [ngClass]="{ hidden: !isRescheduleModalOpen(), flex: isRescheduleModalOpen() }"
+  >
+    <div class="bg-white rounded-2xl w-full max-w-2xl my-8">
+      <div class="p-6 border-b border-gray-200">
+        <h3 class="text-xl font-semibold text-gray-800">Reschedule Appointment</h3>
+        @if (selectedAppointmentForReschedule) {
+        <p class="text-gray-600 mt-1">
+          Patient: {{ selectedAppointmentForReschedule.patient.name }}
+        </p>
+        <p class="text-sm text-gray-500">
+          Current: {{ selectedAppointmentForReschedule.appointmentDate }} |
+          {{ formatTime(selectedAppointmentForReschedule.startTime) }} -
+          {{ formatTime(selectedAppointmentForReschedule.endTime) }}
+        </p>
+        }
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Date Selection -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"> Select New Date </label>
+          <input
+            type="date"
+            [(ngModel)]="rescheduleDate"
+            (change)="onRescheduleDateChange()"
+            [min]="getMinDate()"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Available Slots -->
+        @if (rescheduleDate) {
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"> Available Time Slots </label>
+
+          @if (isLoadingSlots) {
+          <div class="text-center py-8">
+            <div
+              class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
+            ></div>
+            <p class="text-gray-600 mt-2">Loading available slots...</p>
+          </div>
+          } @if (!isLoadingSlots && availableSlots.length === 0) {
+          <div class="text-center py-8 bg-gray-50 rounded-lg">
+            <p class="text-gray-500">No available slots for this date</p>
+            <p class="text-sm text-gray-400 mt-1">Please select another date</p>
+          </div>
+          } @if (!isLoadingSlots && availableSlots.length > 0) {
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-64 overflow-y-auto">
+            @for (slot of availableSlots; track slot.availabilityId) {
+            <button
+              type="button"
+              (click)="selectSlotForReschedule(slot)"
+              [class.bg-blue-600]="selectedSlot?.availabilityId === slot.availabilityId"
+              [class.text-white]="selectedSlot?.availabilityId === slot.availabilityId"
+              [class.bg-white]="selectedSlot?.availabilityId !== slot.availabilityId"
+              [class.text-gray-700]="selectedSlot?.availabilityId !== slot.availabilityId"
+              class="p-3 border-2 border-gray-300 rounded-lg hover:border-blue-500 transition font-medium text-sm"
+            >
+              <div class="flex items-center justify-center gap-1">
+                <span>🕐</span>
+                <span>{{ formatTime(slot.startTime) }} - {{ formatTime(slot.endTime) }}</span>
+              </div>
+            </button>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Selected Slot Summary -->
+        @if (selectedSlot) {
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h4 class="font-medium text-gray-800 mb-2">New Appointment Details</h4>
+          <div class="space-y-1 text-sm text-gray-600">
+            <p><strong>Patient:</strong> {{ selectedAppointmentForReschedule?.patient?.name }}</p>
+            <p><strong>New Date:</strong> {{ rescheduleDate }}</p>
+            <p>
+              <strong>New Time:</strong> {{ formatTime(selectedSlot.startTime) }} -
+              {{ formatTime(selectedSlot.endTime) }}
+            </p>
+          </div>
+        </div>
+        }
+      </div>
+
+      <div class="p-6 border-t border-gray-200 flex gap-3">
+        <button
+          (click)="closeRescheduleModal()"
+          class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition font-medium"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="confirmReschedule()"
+          [disabled]="!selectedSlot"
+          [class.opacity-50]="!selectedSlot"
+          [class.cursor-not-allowed]="!selectedSlot"
+          class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-500 transition font-medium disabled:hover:bg-blue-600"
+        >
+          Confirm Reschedule
+        </button>
+      </div>
     </div>
   </div>
 </body>

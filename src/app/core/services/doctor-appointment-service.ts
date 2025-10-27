@@ -4,7 +4,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.js';
-import { Appointment } from '../../models/doctor-appointment-interface.js';
+import { Appointment } from '../../models/doctor-appointment-interface';
 
 @Injectable({
   providedIn: 'root',
@@ -32,7 +32,7 @@ export class AppointmentService {
 
   // 🔑 1. Method for Total Patients (Uses the base /api path)
   getTotalPatientCount(): Observable<number> {
-    return this.http.get<number>(`${this.apiUrl}/dashboard/patient-count`);
+    return this.http.get<number>(`${this.apiUrl}/doctor/patient-count`);
   }
 
   // 🔑 2. Method for Pending Reviews (Uses the doctor-specific /api/doctors/dashboard path)
@@ -58,11 +58,19 @@ export class AppointmentService {
     return this.http.post(`${this.apiUrl}/doctors/me/appointments/${appointmentId}/reject`, body);
   }
 
-  saveConsultationNotes(appointmentId: number, notesPayload: any): Observable<any> {
-    // notesPayload: { diagnosis: string, symptoms: string, notes: string, prescription: string }
-    return this.http.post(
-      `${this.doctorAppointmentsUrl}/${appointmentId}/consultation`,
-      notesPayload
+  saveConsultationNotes(appointmentId: number, notes: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/doctors/appointments/${appointmentId}/notes`, notes);
+  }
+
+  completeMedicalRecord(medicalRecordData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/doctors/me/medical-records`, medicalRecordData);
+  }
+
+  // Reschedule an appointment
+  rescheduleAppointment(appointmentId: number, rescheduleData: any): Observable<any> {
+    return this.http.put<any>(
+      `${this.apiUrl}/doctors/appointments/${appointmentId}/reschedule`,
+      rescheduleData
     );
   }
 }

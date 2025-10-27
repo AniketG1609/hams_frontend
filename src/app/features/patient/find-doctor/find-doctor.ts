@@ -9,6 +9,14 @@ import { PatientService } from '../../../core/services/patient-service';
 import { Sidebar } from '../../../shared/patient/sidebar/sidebar';
 import { DoctorResponseDTO } from '../../../models/doctor-interface';
 import { AppointmentService } from '../../../core/services/patient-appointment-service';
+import { toast } from 'ngx-sonner';
+
+interface DoctorAvailabilitySlot {
+  availabilityId: number;
+  availableDate: string;
+  startTime: string;
+  endTime: string;
+}
 
 @Component({
   selector: 'app-find-doctor',
@@ -25,6 +33,10 @@ export class FindDoctorComponent implements OnInit {
   searchType: 'name' | 'specialization' = 'name';
   showBookingModal: boolean = false;
   selectedDoctor: DoctorResponseDTO | null = null;
+  selectedDate: string = '';
+  availableSlots: DoctorAvailabilitySlot[] = [];
+  selectedSlot: DoctorAvailabilitySlot | null = null;
+  isLoadingSlots: boolean = false;
 
   appointmentData: AppointmentDTO = {
     doctorId: 0,
@@ -99,11 +111,61 @@ export class FindDoctorComponent implements OnInit {
     this.selectedDoctor = doctor;
     this.appointmentData.doctorId = doctor.doctorId;
     this.showBookingModal = true;
+    this.selectedDate = '';
+    this.availableSlots = [];
+    this.selectedSlot = null;
+  }
+
+  onDateChange(): void {
+    if (this.selectedDate && this.selectedDoctor) {
+      this.loadAvailableSlots();
+    } else {
+      this.availableSlots = [];
+      this.selectedSlot = null;
+    }
+  }
+
+  loadAvailableSlots(): void {
+    if (!this.selectedDoctor || !this.selectedDate) return;
+
+    this.isLoadingSlots = true;
+    // You need to add this method to your PatientService
+    this.patientService
+      .getDoctorAvailabilityByDate(this.selectedDoctor.doctorId, this.selectedDate)
+      .subscribe({
+        next: (slots) => {
+          this.availableSlots = slots;
+          this.selectedSlot = null;
+          this.isLoadingSlots = false;
+        },
+        error: (error) => {
+          console.error('Error loading available slots:', error);
+          this.availableSlots = [];
+          this.isLoadingSlots = false;
+        },
+      });
+  }
+
+  selectSlot(slot: DoctorAvailabilitySlot): void {
+    this.selectedSlot = slot;
+    this.appointmentData.appointmentDate = slot.availableDate;
+    this.appointmentData.startTime = this.formatTime(slot.startTime);
+    this.appointmentData.endTime = this.formatTime(slot.endTime);
+  }
+
+  formatTime(time: string): string {
+    if (time && time.split(':').length === 2) {
+      return `${time}:00`;
+    }
+    return time;
   }
 
   closeBookingModal(): void {
     this.showBookingModal = false;
     this.selectedDoctor = null;
+    this.selectedDate = '';
+    this.availableSlots = [];
+    this.selectedSlot = null;
     this.appointmentData = {
       doctorId: 0,
       appointmentDate: '',
@@ -123,13 +185,33 @@ export class FindDoctorComponent implements OnInit {
       this.appointmentService.bookAppointment(this.appointmentData).subscribe({
         next: (appointment) => {
           console.log('Appointment booked successfully:', appointment);
+
+          // --- SUCCESS TOAST ---
+          toast.success('Appointment Confirmed 🎉', {
+            description: 'Your appointment has been successfully booked.',
+          });
+          // alert('Appointment booked successfully!'); // Removed
+
           this.closeBookingModal();
           this.router.navigate(['/patient/my-appointments']);
         },
         error: (error) => {
           console.error('Error booking appointment:', error);
+
+          // --- ERROR TOAST ---
+          const errorMessage = error.error?.message || 'Server error occurred.';
+          toast.error('Booking Failed ❌', {
+            description: `Failed to book appointment: ${errorMessage} Please try again.`,
+          });
+          // alert('Failed to book appointment. Please try again.'); // Removed
         },
       });
+    } else {
+      // --- VALIDATION TOAST ---
+      toast.warning('Missing Selection', {
+        description: 'Please ensure a doctor, date, and time slot are selected.',
+      });
+      // alert('Please select a date and time slot.'); // Removed
     }
   }
 
@@ -139,5 +221,10 @@ export class FindDoctorComponent implements OnInit {
       .map((n) => n[0])
       .join('')
       .toUpperCase();
+  }
+
+  getMinDate(): string {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   }
 }

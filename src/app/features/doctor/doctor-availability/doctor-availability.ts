@@ -10,6 +10,7 @@ import {
   DoctorAvailabilityService,
 } from 'src/app/core/services/doctor-availability-service.js';
 import { toast } from 'ngx-sonner';
+import { DoctorAuthService } from 'src/app/core/services/doctor-auth-service.js';
 
 interface LocalAvailabilitySlot extends AvailabilitySlot {}
 
@@ -22,6 +23,7 @@ interface LocalAvailabilitySlot extends AvailabilitySlot {}
 })
 export class DoctorAvailability implements OnInit {
   private availabilityService = inject(DoctorAvailabilityService);
+  private doctorAuthService = inject(DoctorAuthService);
 
   currentTab: 'slots' | 'add' = 'slots';
   scheduledSlots: AvailabilitySlot[] = [];
@@ -252,5 +254,9 @@ export class DoctorAvailability implements OnInit {
         },
       });
     }
+  }
+
+  logout(): void {
+    this.doctorAuthService.logout();
   }
 }

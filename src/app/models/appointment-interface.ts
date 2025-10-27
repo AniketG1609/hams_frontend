@@ -17,6 +17,8 @@ export interface AppointmentResponseDTO {
   status: string;
   patient: PatientResponseDTO;
   doctor: DoctorResponseDTO;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PatientResponseDTO {

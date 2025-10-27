@@ -1,9 +1,5 @@
 import { NotificationService } from './../../../core/services/patient-notification-service';
-// DoctorDashboard.ts (or AdminDashboard.ts)
-
 import { Component, OnInit } from '@angular/core';
-// 💡 If you encountered TS2835 errors (module resolution), this import must be:
-// import { AppointmentService } from '../../../core/services/appointment.service.js';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -26,7 +22,7 @@ import { Sidebar } from '@shared/doctor/sidebar/sidebar';
 export class DoctorDashboard implements OnInit {
   AppointmentCount: number = 0;
   totalPatientCount: number = 0;
-  pendingReviewsCount: number = 0; // 🔑 New property for Pending Reviews
+  pendingReviewsCount: number = 0;
   doctor: DoctorResponseDTO | null = null;
   notifications: NotificationResponseDTO[] = [];
   stats = {
@@ -37,6 +33,7 @@ export class DoctorDashboard implements OnInit {
   };
 
   todayAppointments: Appointment[] = [];
+  isLoading: boolean = false;
 
   constructor(
     private appointmentService: AppointmentService,
@@ -54,8 +51,6 @@ export class DoctorDashboard implements OnInit {
     this.fetchTodayAppointments();
   }
 
-  // DoctorDashboard.ts
-
   fetchAppointmentCount(): void {
     this.appointmentService.getTodayAppointmentCount().subscribe({
       next: (count: number) => {
@@ -63,23 +58,18 @@ export class DoctorDashboard implements OnInit {
       },
       error: (err: any) => {
         console.error('Failed to fetch today appointment count:', err);
-        // Handle error display
       },
     });
   }
 
-  /**
-   * 🔑 New method to fetch the total number of patients.
-   */
   fetchTotalPatientCount(): void {
     this.appointmentService.getTotalPatientCount().subscribe({
       next: (count: number) => {
-        // Assign the fetched count to the new property
         this.totalPatientCount = count;
       },
       error: (err: any) => {
         console.error('Failed to fetch total patient count:', err);
-        this.totalPatientCount = 12; // Set to 0 or a placeholder on failure
+        this.totalPatientCount = 0;
       },
     });
   }
@@ -91,43 +81,97 @@ export class DoctorDashboard implements OnInit {
       },
       error: (err: any) => {
         console.error('Failed to fetch pending reviews count:', err);
-        this.pendingReviewsCount = 2;
+        this.pendingReviewsCount = 0;
       },
     });
   }
 
-  // DoctorDashboard.ts (or the component where this method resides)
-
-  // Assuming 'this.doctorService' refers to the service containing getLoggedInDoctorProfile
-  // If you injected it as 'doctorAuthService', update the property name accordingly.
-
   fetchDoctorProfile(): void {
-    // Assuming DoctorAuthService has a method to get the logged-in doctor's profile
-    // 🔑 FIX: Add parentheses () to call the method and return the Observable.
     this.doctorService.getLoggedInDoctorProfile().subscribe({
       next: (profile: DoctorResponseDTO) => {
-        this.doctor = profile; // 👈 Populates the 'doctor' property
+        this.doctor = profile;
       },
       error: (err: any) => {
         console.error('Failed to fetch doctor profile:', err);
-        // Handle error: e.g., redirect or set a default
       },
     });
   }
 
   fetchNotificationCount(): void {
-    // 🔑 FIX 1: Change 'markAllAsRead' to a method designed to GET the count (e.g., 'getUnreadNotificationCount').
-    // 🔑 FIX 2: Add parentheses () to call the method.
     this.notificationService.getUnreadNotificationCount().subscribe({
       next: (count: number) => {
-        // The service should return the count, which is then assigned to stats.notifications
         this.stats.notifications = count;
       },
       error: (err: any) => {
         console.error('Failed to fetch notification count:', err);
-        this.stats.notifications = 0; // Set to 0 on failure
+        this.stats.notifications = 0;
       },
     });
+  }
+
+  fetchTodayAppointments(): void {
+    this.isLoading = true;
+    this.appointmentService.getTodayAppointmentsForDoctor().subscribe({
+      next: (appointments: Appointment[]) => {
+        this.todayAppointments = appointments;
+        this.isLoading = false;
+        console.log('Today appointments loaded:', appointments);
+      },
+      error: (err: any) => {
+        console.error('Failed to fetch today appointments:', err);
+        this.todayAppointments = [];
+        this.isLoading = false;
+      },
+    });
+  }
+
+  confirmAppointment(appointmentId: number): void {
+    if (!confirm('Are you sure you want to confirm this appointment?')) {
+      return;
+    }
+
+    this.appointmentService.confirmAppointment(appointmentId).subscribe({
+      next: () => {
+        alert('Appointment confirmed successfully!');
+        this.fetchTodayAppointments(); // Refresh the list
+        this.fetchAppointmentCount(); // Update count
+      },
+      error: (err: any) => {
+        console.error('Failed to confirm appointment:', err);
+        alert('Failed to confirm appointment. Please try again.');
+      },
+    });
+  }
+
+  rejectAppointment(appointmentId: number): void {
+    const reason = prompt('Please provide a reason for rejection (optional):');
+
+    if (reason === null) {
+      // User cancelled
+      return;
+    }
+
+    this.appointmentService.rejectAppointment(appointmentId, reason || undefined).subscribe({
+      next: () => {
+        alert('Appointment rejected successfully!');
+        this.fetchTodayAppointments(); // Refresh the list
+        this.fetchAppointmentCount(); // Update count
+      },
+      error: (err: any) => {
+        console.error('Failed to reject appointment:', err);
+        alert('Failed to reject appointment. Please try again.');
+      },
+    });
+  }
+
+  viewAllAppointments(): void {
+    this.router.navigate(['/doctor/appointments']);
+  }
+
+  viewAppointmentDetails(appointment: Appointment): void {
+    console.log('Viewing appointment details:', appointment);
+    // Navigate to appointment details page or open a modal
+    this.router.navigate(['/doctor/appointments', appointment.appointmentId]);
   }
 
   generateInitials(fullName: string): string {
@@ -146,75 +190,5 @@ export class DoctorDashboard implements OnInit {
     const lastInitial = nameParts[nameParts.length - 1].charAt(0).toUpperCase();
 
     return firstInitial + lastInitial;
-  }
-
-  generateRandomDoctorName(): string {
-    const firstNames = [
-      'John',
-      'Jane',
-      'Michael',
-      'Sarah',
-      'David',
-      'Emily',
-      'Robert',
-      'Lisa',
-      'William',
-      'Anna',
-    ];
-    const lastNames = [
-      'Smith',
-      'Johnson',
-      'Williams',
-      'Brown',
-      'Jones',
-      'Garcia',
-      'Miller',
-      'Davis',
-      'Rodriguez',
-      'Martinez',
-    ];
-
-    const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
-
-    return `${randomFirst} ${randomLast}`;
-  }
-
-  fetchTodayAppointments(): void {
-    this.appointmentService.getTodayAppointmentsForDoctor().subscribe({
-      next: (appointments: Appointment[]) => {
-        this.todayAppointments = appointments;
-      },
-      error: (err: any) => {
-        console.error('Failed to fetch today appointments:', err);
-        this.todayAppointments = [];
-      },
-    });
-  }
-
-  confirmAppointment(appointmentId: number): void {
-    this.appointmentService.confirmAppointment(appointmentId).subscribe({
-      next: () => {
-        this.fetchTodayAppointments(); // Refresh the list
-        alert('Appointment confirmed successfully!');
-      },
-      error: (err: any) => {
-        console.error('Failed to confirm appointment:', err);
-        alert('Failed to confirm appointment.');
-      },
-    });
-  }
-
-  rejectAppointment(appointmentId: number, reason?: string): void {
-    this.appointmentService.rejectAppointment(appointmentId, reason).subscribe({
-      next: () => {
-        this.fetchTodayAppointments(); // Refresh the list
-        alert('Appointment rejected successfully!');
-      },
-      error: (err: any) => {
-        console.error('Failed to reject appointment:', err);
-        alert('Failed to reject appointment.');
-      },
-    });
   }
 }

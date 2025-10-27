@@ -19,24 +19,25 @@ export interface DoctorAvailabilityPayload {
 export class DoctorAvailabilityService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/doctors/availability`;
-  private updateUrl = `${environment.apiUrl}/admin`;
-  private deleteUrl = `${environment.apiUrl}/doctors/availability`;
+  private apiUrl = environment.apiUrl;
 
   getScheduledSlots(): Observable<AvailabilitySlot[]> {
     return this.http.get<AvailabilitySlot[]>(this.baseUrl);
   }
 
   saveNewSlot(slot: Partial<AvailabilitySlot>): Observable<AvailabilitySlot> {
-    // The backend should infer the Doctor ID from the JWT token
     return this.http.post<AvailabilitySlot>(this.baseUrl, slot);
   }
 
   updateSlot(slot: DoctorAvailabilityPayload): Observable<AvailabilitySlot> {
-    // 🔑 Using the assumed DOCTOR-friendly PUT endpoint
     return this.http.put<AvailabilitySlot>(`${this.baseUrl}/${slot.id}`, slot);
   }
 
   deleteSlot(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  getMyAvailabilityByDate(date: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/doctor/availability?date=${date}`);
   }
 }

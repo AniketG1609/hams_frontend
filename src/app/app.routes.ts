@@ -83,7 +83,7 @@ export const routes: Routes = [
           import('./features/patient/patient-profile/patient-profile').then(
             (m) => m.PatientProfile
           ),
-        title: 'Medical Records',
+        title: 'Patient Profile',
       },
       // Add other patient sub-routes here
     ],
@@ -133,6 +133,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/doctor/doctor-profile/doctor-profile').then((m) => m.DoctorProfile),
         title: 'Doctor Profile',
+      },
+      {
+        path: 'medical-record',
+        loadComponent: () =>
+          import('./features/doctor/medical-record/medical-record').then(
+            (m) => m.DoctorMedicalRecords
+          ),
+        title: 'Doctor Medical Record',
       },
     ],
   },

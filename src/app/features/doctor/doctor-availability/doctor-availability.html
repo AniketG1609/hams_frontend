@@ -32,26 +32,21 @@
           >⏰ Availability</a
         >
       </li>
+
       <li>
         <a
-          [routerLink]="['/doctor/prescriptions']"
-          class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
-          >💊 Prescriptions</a
-        >
-      </li>
-      <li>
-        <a
-          [routerLink]="['/doctor/medical-records']"
+          [routerLink]="['/doctor/medical-record']"
           class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
           >📋 Medical Records</a
         >
       </li>
       <li>
-        <a
-          [routerLink]="['/doctor/settings']"
-          class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
-          >⚙️ Settings</a
+        <button
+          (click)="logout()"
+          class="flex items-center gap-3 px-6 py-3 font-medium text-red-600 hover:bg-gray-100 hover:border-l-4 hover:border-red-600 rounded-l w-full text-left"
         >
+          🚪 Logout
+        </button>
       </li>
     </ul>
   </aside>

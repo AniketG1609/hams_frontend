@@ -1,33 +1,14 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { AppointmentService } from '../../../core/services/doctor-appointment-service.js';
-
-interface Patient {
-  name: string;
-  age: number;
-  gender: string;
-  phone: string;
-}
-
-interface Doctor {
-  doctorId: number;
-  doctorName: string;
-  specialization: string;
-}
-
-interface Appointment {
-  appointmentId: number;
-  appointmentDate: string;
-  startTime: string;
-  endTime: string;
-  reason: string;
-  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'REJECTED';
-  patient: Patient;
-  doctor: Doctor;
-}
+import { AppointmentService } from '../../../core/services/doctor-appointment-service';
+import { DoctorAvailabilityService } from 'src/app/core/services/doctor-availability-service';
+import { DoctorAuthService } from 'src/app/core/services/doctor-auth-service';
+import { Appointment } from 'src/app/models/doctor-appointment-interface';
+import { DoctorAvailabilityPayload } from 'src/app/models/availabilityslot-interface';
+import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-doctor-appointments',
@@ -37,6 +18,8 @@ interface Appointment {
 })
 export class DoctorAppointments implements OnInit {
   private appointmentService = inject(AppointmentService);
+  private availabilityService = inject(DoctorAvailabilityService);
+  private doctorAuthService = inject(DoctorAuthService);
 
   appointments = signal<Appointment[]>([]);
   filteredAppointments = signal<Appointment[]>([]);
@@ -54,31 +37,39 @@ export class DoctorAppointments implements OnInit {
   confirmedCount = signal(0);
   completedCount = signal(0);
 
-  // constructor(private http: HttpClient) {}
-
+  // Consultation Modal
   isNotesModalOpen = signal(false);
   consultationNotes = { diagnosis: '', symptoms: '', notes: '', prescription: '' };
+
+  // Reschedule Modal
+  isRescheduleModalOpen = signal(false);
+  selectedAppointmentForReschedule: Appointment | null = null;
+  rescheduleDate: string = '';
+  availableSlots: DoctorAvailabilityPayload[] = [];
+  selectedSlot: DoctorAvailabilityPayload | null = null;
+  isLoadingSlots: boolean = false;
 
   ngOnInit(): void {
     this.loadAppointments();
   }
 
-  // 🔹 Placeholder for backend integration
   loadAppointments(): void {
     this.isLoading.set(true);
-    // Fetch all appointments for client-side filtering flexibility
     this.appointmentService.getDoctorAppointments('all').subscribe({
       next: (data) => {
-        this.appointments.set(data); // Update signal
+        this.appointments.set(data);
         this.updateStats();
-        this.filterAppointments(); // Apply initial filters
+        this.filterAppointments();
         this.isLoading.set(false);
       },
       error: (err) => {
         console.error('Failed to load appointments:', err);
         this.appointments.set([]);
         this.isLoading.set(false);
-        alert('Failed to load appointments. Check your network or API response.');
+        // Replaced alert with toast
+        toast.error('Failed to Load Appointments', {
+          description: 'Please check your network connection or API configuration.',
+        });
       },
     });
   }
@@ -107,7 +98,6 @@ export class DoctorAppointments implements OnInit {
 
     const filtered = this.appointments().filter((a) => {
       const matchesSearch = a.patient.name.toLowerCase().includes(search);
-      // Status filter compares component property (e.g., 'PENDING') with API response status (e.g., 'PENDING')
       const matchesStatus = this.statusFilter === 'all' || a.status === this.statusFilter;
 
       const appointmentDate = new Date(a.appointmentDate);
@@ -140,78 +130,254 @@ export class DoctorAppointments implements OnInit {
       return matchesSearch && matchesStatus && matchesDate;
     });
 
-    // Update filtered list signal
     this.filteredAppointments.set(filtered);
   }
 
-  // 🔹 Backend Action: Confirm Appointment
   confirmAppointment(id: number): void {
     const appointment = this.appointments().find((a) => a.appointmentId === id);
     if (!appointment) return;
 
-    if (confirm(`Confirm appointment with ${appointment.patient.name}?`)) {
-      this.appointmentService.confirmAppointment(id).subscribe({
-        next: () => {
-          alert(`✅ Appointment confirmed for ${appointment.patient.name}`);
-          this.loadAppointments(); // Reload data
-        },
-        error: (err) => {
-          console.error('Confirm failed:', err);
-          alert('Failed to confirm appointment. Try again.');
-        },
-      });
-    }
-  }
-
-  // 🔹 Backend Action: Cancel/Reject Appointment
-  cancelAppointment(id: number): void {
-    const appointment = this.appointments().find((a) => a.appointmentId === id);
-    if (!appointment) return;
-
-    const reason = prompt('Please provide a reason for cancellation:');
-    if (reason) {
-      this.appointmentService.rejectAppointment(id, reason).subscribe({
-        next: () => {
-          alert(`❌ Appointment rejected for ${appointment.patient.name}`);
-          this.loadAppointments(); // Reload data
-        },
-        error: (err) => {
-          console.error('Reject failed:', err);
-          alert('Failed to reject appointment. Try again.');
-        },
-      });
-    }
-  }
-
-  // 🔹 UI Action: Open Consultation Modal
-  startConsultation(id: number): void {
-    this.currentAppointmentId = id;
-    this.consultationNotes = { diagnosis: '', symptoms: '', notes: '', prescription: '' }; // Reset form
-    this.isNotesModalOpen.set(true);
-  }
-
-  // 🔹 Backend Action: Save Notes and Complete Appointment
-  saveNotes(): void {
-    if (!this.currentAppointmentId) return;
-
-    const payload = { ...this.consultationNotes };
-
-    this.appointmentService.saveConsultationNotes(this.currentAppointmentId, payload).subscribe({
+    // NOTE: Replaced blocking confirm() with direct action. You should implement a custom modal
+    // or confirmation service here for a proper user flow.
+    this.appointmentService.confirmAppointment(id).subscribe({
       next: () => {
-        alert('Consultation notes saved and appointment marked as COMPLETED!');
-        this.isNotesModalOpen.set(false); // Close modal
-        this.loadAppointments(); // Reload data
+        // Replaced alert with toast
+        toast.success('Appointment Confirmed', {
+          description: `Appointment with ${appointment.patient.name} is now CONFIRMED.`,
+          duration: 3000,
+        });
+        this.loadAppointments();
       },
       error: (err) => {
-        console.error('Save notes failed:', err);
-        alert('Failed to save notes. Check your API configuration.');
+        console.error('Confirm failed:', err);
+        // Replaced alert with toast
+        toast.error('Confirmation Failed', {
+          description: 'Failed to confirm appointment. Please try again.',
+          duration: 5000,
+        });
       },
     });
   }
 
+  cancelAppointment(id: number): void {
+    const appointment = this.appointments().find((a) => a.appointmentId === id);
+    if (!appointment) return;
+
+    // NOTE: Replaced blocking prompt() with a placeholder reason. You must implement a custom
+    // input modal to gather the cancellation reason from the user.
+    const reason = 'Doctor unavailable - temporary placeholder reason.';
+
+    if (reason) {
+      this.appointmentService.rejectAppointment(id, reason).subscribe({
+        next: () => {
+          // Replaced alert with toast
+          toast.success('Appointment Rejected', {
+            description: `Appointment with ${appointment.patient.name} has been rejected.`,
+            duration: 3000,
+          });
+          this.loadAppointments();
+        },
+        error: (err) => {
+          console.error('Reject failed:', err);
+          // Replaced alert with toast
+          toast.error('Rejection Failed', {
+            description: 'Failed to reject appointment. Please try again.',
+            duration: 5000,
+          });
+        },
+      });
+    }
+  }
+
+  startConsultation(id: number): void {
+    this.currentAppointmentId = id;
+    this.consultationNotes = { diagnosis: '', symptoms: '', notes: '', prescription: '' };
+    this.isNotesModalOpen.set(true);
+  }
+
+  saveNotes(): void {
+    if (!this.currentAppointmentId) return;
+
+    const appointment = this.appointments().find(
+      (a) => a.appointmentId === this.currentAppointmentId
+    );
+    if (!appointment) {
+      // Replaced alert with toast
+      toast.warning('Action Blocked', {
+        description: 'Cannot save notes. Appointment data not found.',
+      });
+      return;
+    }
+
+    // Prepare medical record data
+    const medicalRecordData = {
+      appointmentId: this.currentAppointmentId,
+      patientId: appointment.patient.patientId || 0, // You'll need to add patientId to Patient interface
+      doctorId: appointment.doctor.doctorId,
+      reason: appointment.reason || 'Consultation',
+      diagnosis: this.consultationNotes.diagnosis,
+      notes: this.consultationNotes.notes,
+      prescriptions: this.consultationNotes.prescription
+        ? [
+            {
+              medicationName: this.consultationNotes.prescription,
+              dosage: '', // Can be enhanced to capture separately
+              instructions: this.consultationNotes.symptoms || '',
+            },
+          ]
+        : [],
+    };
+
+    console.log('Saving medical record:', medicalRecordData);
+
+    this.appointmentService.completeMedicalRecord(medicalRecordData).subscribe({
+      next: () => {
+        // Replaced alert with toast
+        toast.success('Consultation Completed', {
+          description: 'Notes saved and appointment marked as COMPLETED.',
+          duration: 3000,
+        });
+        this.isNotesModalOpen.set(false);
+        this.loadAppointments();
+      },
+      error: (err) => {
+        console.error('Save notes failed:', err);
+        console.error('Error details:', err.error);
+        // Replaced alert with toast
+        toast.error('Save Failed', {
+          description: `Failed to save notes: ${
+            err.error?.message || 'Check your API configuration.'
+          }`,
+          duration: 7000,
+        });
+      },
+    });
+  }
+
+  // Reschedule Functions
+  openRescheduleModal(appointment: Appointment): void {
+    this.selectedAppointmentForReschedule = appointment;
+    this.rescheduleDate = '';
+    this.availableSlots = [];
+    this.selectedSlot = null;
+    this.isRescheduleModalOpen.set(true);
+  }
+
+  closeRescheduleModal(): void {
+    this.isRescheduleModalOpen.set(false);
+    this.selectedAppointmentForReschedule = null;
+    this.rescheduleDate = '';
+    this.availableSlots = [];
+    this.selectedSlot = null;
+  }
+
+  onRescheduleDateChange(): void {
+    if (this.rescheduleDate && this.selectedAppointmentForReschedule) {
+      this.loadAvailableSlotsForReschedule();
+    } else {
+      this.availableSlots = [];
+      this.selectedSlot = null;
+    }
+  }
+
+  loadAvailableSlotsForReschedule(): void {
+    if (!this.rescheduleDate) return;
+
+    this.isLoadingSlots = true;
+    console.log('Loading slots for date:', this.rescheduleDate);
+
+    // You need to add this method to your AppointmentService
+    // It should call the backend to get available slots for the logged-in doctor
+    this.availabilityService.getMyAvailabilityByDate(this.rescheduleDate).subscribe({
+      next: (slots) => {
+        console.log('Received slots:', slots);
+        this.availableSlots = slots;
+        this.selectedSlot = null;
+        this.isLoadingSlots = false;
+      },
+      error: (error) => {
+        console.error('Error loading available slots:', error);
+        console.error('Error details:', error.error);
+        this.availableSlots = [];
+        this.isLoadingSlots = false;
+        // Replaced alert with toast
+        toast.error('Slot Loading Failed', {
+          description: 'Failed to load available slots. Check console for details.',
+          duration: 7000,
+        });
+      },
+    });
+  }
+
+  selectSlotForReschedule(slot: DoctorAvailabilityPayload): void {
+    this.selectedSlot = slot;
+  }
+
+  confirmReschedule(): void {
+    if (!this.selectedSlot || !this.selectedAppointmentForReschedule) {
+      // Replaced alert with toast
+      toast.warning('Reschedule Failed', {
+        description: 'Please select a new date and time slot.',
+      });
+      return;
+    }
+
+    const rescheduleData = {
+      appointmentDate: this.selectedSlot.availableDate,
+      startTime: this.formatTimeToHHMMSS(this.selectedSlot.startTime),
+      endTime: this.formatTimeToHHMMSS(this.selectedSlot.endTime),
+    };
+
+    console.log('Rescheduling with data:', rescheduleData);
+
+    this.appointmentService
+      .rescheduleAppointment(this.selectedAppointmentForReschedule.appointmentId, rescheduleData)
+      .subscribe({
+        next: () => {
+          // Replaced alert with toast
+          toast.success('Reschedule Successful', {
+            description: 'The appointment has been updated.',
+            duration: 3000,
+          });
+          this.closeRescheduleModal();
+          this.loadAppointments();
+        },
+        error: (error) => {
+          console.error('Error rescheduling appointment:', error);
+          console.error('Error details:', error.error);
+          // Replaced alert with toast
+          toast.error('Reschedule Failed', {
+            description: `Failed to reschedule: ${error.error?.message || 'Please try again.'}`,
+            duration: 7000,
+          });
+        },
+      });
+  }
+
+  formatTimeToHHMMSS(time: string): string {
+    // Convert to HH:mm:ss format
+    if (!time) return time;
+    const parts = time.split(':');
+    if (parts.length === 2) {
+      // HH:mm → HH:mm:ss
+      return `${parts[0]}:${parts[1]}:00`;
+    }
+    // Already HH:mm:ss
+    return time;
+  }
+
+  getMinDate(): string {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  }
+
   viewNotes(notes: string): void {
-    // This is a placeholder; in a real app, you would fetch the specific notes for the completed appointment ID.
-    alert(`📝 Consultation Notes:\n\n${notes}`);
+    // Replaced alert with toast and console log for large text
+    toast.info('Consultation Notes Logged', {
+      description: 'Full notes displayed in console for review.',
+      duration: 4000,
+    });
+    console.log('📝 Consultation Notes:', notes);
   }
 
   getInitials(name: string): string {
@@ -221,5 +387,13 @@ export class DoctorAppointments implements OnInit {
       .map((n) => n[0])
       .join('')
       .toUpperCase();
+  }
+
+  logout(): void {
+    this.doctorAuthService.logout();
+    toast.info('Logged Out', {
+      description: 'You have been successfully logged out.',
+      duration: 3000,
+    });
   }
 }

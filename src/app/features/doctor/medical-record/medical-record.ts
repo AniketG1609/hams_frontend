@@ -39,13 +39,15 @@ export class DoctorMedicalRecords implements OnInit {
 
   ngOnInit(): void {
     this.loadDoctorData();
-    this.loadMedicalRecords();
+    // console.log('Going');
+    // this.loadMedicalRecords();
   }
 
   loadDoctorData(): void {
     this.doctorService.getLoggedInDoctorProfile().subscribe({
       next: (doctor) => {
         this.doctor = doctor;
+        this.loadMedicalRecords();
       },
       error: (error) => {
         console.error('Error loading doctor data:', error);
@@ -56,8 +58,9 @@ export class DoctorMedicalRecords implements OnInit {
   loadMedicalRecords(): void {
     if (!this.doctor) return;
 
+    // console.log('doctor', this.doctor);
     this.isLoading = true;
-    this.medicalRecordService.getRecordsForDoctor(this.doctor.doctorId).subscribe({
+    this.medicalRecordService.getRecordsForDoctor().subscribe({
       next: (records) => {
         this.medicalRecords = records;
         this.filteredRecords = records;
@@ -138,10 +141,6 @@ export class DoctorMedicalRecords implements OnInit {
   downloadPrescription(record: MedicalRecordResponseDTO): void {
     console.log('Downloading prescription for record:', record.recordId);
     // Implement prescription download logic
-  }
-
-  hasPrescriptions(record: MedicalRecordResponseDTO): boolean {
-    return record.prescriptions && record.prescriptions.length > 0;
   }
 
   getPatientInitials(name: string): string {

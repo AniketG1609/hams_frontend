@@ -198,7 +198,7 @@
               </div>
             </div>
 
-            @if (hasPrescriptions(record)) {
+            <!-- @if (hasPrescriptions(record)) {
             <div class="border-t border-gray-200 pt-4 mb-4">
               <h4 class="font-medium text-gray-700 mb-2 text-sm">
                 Prescriptions ({{ record.prescriptions.length }})
@@ -218,7 +218,7 @@
                 }
               </div>
             </div>
-            }
+            } -->
 
             <div class="flex gap-2 pt-4 border-t border-gray-200">
               <button
@@ -227,15 +227,6 @@
               >
                 View Full Details
               </button>
-
-              @if (hasPrescriptions(record)) {
-              <button
-                (click)="downloadPrescription(record)"
-                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500 transition text-sm"
-              >
-                Download Prescription
-              </button>
-              }
             </div>
           </div>
           } @if (filteredRecords.length === 0) {
@@ -320,37 +311,6 @@
         </div>
       </div>
       }
-
-      <!-- Prescriptions -->
-      @if (hasPrescriptions(selectedRecord)) {
-      <div>
-        <h4 class="font-semibold text-gray-700 mb-3">Prescriptions</h4>
-        <div class="space-y-3">
-          @for (prescription of selectedRecord.prescriptions; track prescription.prescriptionId) {
-          <div class="border border-gray-200 rounded-lg p-4">
-            <div class="flex justify-between items-start mb-2">
-              <h5 class="font-semibold text-lg text-gray-800">{{ prescription.medicationName }}</h5>
-              <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                {{ prescription.prescribedAt | date : 'shortDate' }}
-              </span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span class="font-medium text-gray-700">Dosage:</span>
-                <span class="text-gray-600 ml-2">{{ prescription.dosage }}</span>
-              </div>
-              <div>
-                <span class="font-medium text-gray-700">Instructions:</span>
-                <span class="text-gray-600 ml-2">{{
-                  prescription.instructions || 'As directed'
-                }}</span>
-              </div>
-            </div>
-          </div>
-          }
-        </div>
-      </div>
-      }
     </div>
 
     <div class="p-6 border-t border-gray-200 flex gap-3">
@@ -360,14 +320,6 @@
       >
         Close
       </button>
-      @if (hasPrescriptions(selectedRecord)) {
-      <button
-        (click)="downloadPrescription(selectedRecord)"
-        class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-500 transition font-medium"
-      >
-        Download Prescription
-      </button>
-      }
     </div>
   </div>
 </div>

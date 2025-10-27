@@ -56,10 +56,8 @@ export class MedicalRecordService {
       record
     );
   }
-  getRecordsForDoctor(doctorId: number): Observable<MedicalRecordResponse[]> {
-    return this.http.get<MedicalRecordResponse[]>(
-      `${this.baseUrl}/doctors/${doctorId}/medical-records`
-    );
+  getRecordsForDoctor(): Observable<MedicalRecordResponse[]> {
+    return this.http.get<MedicalRecordResponse[]>(`${this.baseUrl}/doctors/me/medical-records`);
   }
   getPatientRecordsForDoctor(patientId: number): Observable<MedicalRecordResponse[]> {
     return this.http.get<MedicalRecordResponse[]>(

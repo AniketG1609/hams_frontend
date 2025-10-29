@@ -239,7 +239,13 @@ describe('FindDoctorComponent', () => {
 
       component.bookAppointment();
 
-      expect(appointmentService.bookAppointment).toHaveBeenCalledWith(component.appointmentData);
+      expect(appointmentService.bookAppointment).toHaveBeenCalledWith({
+        doctorId: 1,
+        appointmentDate: '2024-01-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        reason: 'Checkup'
+      });
       expect(console.log).toHaveBeenCalledWith('Appointment booked successfully:', mockAppointment);
       expect(component['router'].navigate).toHaveBeenCalledWith(['/patient/my-appointments']);
     });
@@ -274,40 +280,7 @@ describe('FindDoctorComponent', () => {
       expect(appointmentService.bookAppointment).not.toHaveBeenCalled();
     });
 
-    it('should book appointment with populated data', () => {
-      const mockAppointment: any = {
-        appointmentId: 1,
-        appointmentDate: '2024-01-01',
-        startTime: '10:00',
-        endTime: '11:00',
-        reason: 'Checkup',
-        status: 'PENDING',
-        doctor: mockDoctors[0],
-        patient: { patientId: 1, name: 'John Doe' }
-      };
-      appointmentService.bookAppointment.and.returnValue(of(mockAppointment));
-      spyOn(console, 'log');
-      spyOn(component['router'], 'navigate');
-      component.appointmentData = {
-        doctorId: 1,
-        appointmentDate: '2024-01-01',
-        startTime: '10:00',
-        endTime: '11:00',
-        reason: 'Checkup'
-      };
 
-      component.bookAppointment();
-
-      expect(appointmentService.bookAppointment).toHaveBeenCalledWith({
-        doctorId: 1,
-        appointmentDate: '2024-01-01',
-        startTime: '10:00',
-        endTime: '11:00',
-        reason: 'Checkup'
-      });
-      expect(console.log).toHaveBeenCalledWith('Appointment booked successfully:', mockAppointment);
-      expect(component['router'].navigate).toHaveBeenCalledWith(['/patient/my-appointments']);
-    });
   });
 
   describe('getDoctorInitials', () => {

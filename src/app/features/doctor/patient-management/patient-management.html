@@ -1,6 +1,5 @@
 <body class="font-sans bg-gray-100 text-gray-800">
-  <!-- Sidebar -->
-  <aside class="w-64 bg-white shadow-lg fixed h-full overflow-y-auto">
+  <aside class="fixed overflow-y-auto w-64 bg-white shadow-lg p-6 shrink-0 h-[90%]">
     <div class="px-6 py-8 border-b border-gray-200">
       <div class="text-2xl font-bold text-blue-600 flex items-center gap-2">⚕ MediCare</div>
     </div>
@@ -26,6 +25,7 @@
           >👥 Patients</a
         >
       </li>
+
       <li>
         <a
           [routerLink]="['/doctor/availability']"
@@ -35,24 +35,19 @@
       </li>
       <li>
         <a
-          [routerLink]="['/doctor/prescriptions']"
-          class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
-          >💊 Prescriptions</a
-        >
-      </li>
-      <li>
-        <a
-          [routerLink]="['/doctor/medical-records']"
+          [routerLink]="['/doctor/medical-record']"
           class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
           >📋 Medical Records</a
         >
       </li>
+
       <li>
-        <a
-          [routerLink]="['/doctor/settings']"
-          class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
-          >⚙️ Settings</a
+        <button
+          (click)="logout()"
+          class="flex items-center gap-3 px-6 py-3 font-medium text-red-600 hover:bg-gray-100 hover:border-l-4 hover:border-red-600 rounded-l w-full text-left"
         >
+          🚪 Logout
+        </button>
       </li>
     </ul>
   </aside>
@@ -111,8 +106,8 @@
         <select class="filter-select" [(ngModel)]="sortFilter" (ngModelChange)="refreshView()">
           <option value="name">Sort by Name</option>
           <option value="age">Sort by Age</option>
-          <option value="visits">Sort by Visits</option>
-          <option value="lastVisit">Sort by Last Visit</option>
+          <!-- <option value="visits">Sort by Visits</option> -->
+          <!-- <option value="lastVisit">Sort by Last Visit</option> -->
         </select>
       </div>
     </div>
@@ -166,23 +161,23 @@
           </div>
         </div>
 
-        <div class="patient-stats">
-          <div class="patient-stat">
-            <div class="stat-number">{{ patient.totalVisits }}</div>
-            <div class="stat-text">Visits</div>
-          </div>
-          <div class="patient-stat">
-            <div class="stat-number">{{ patient.activeTreatments }}</div>
-            <div class="stat-text">Active</div>
-          </div>
-          <div class="patient-stat">
-            <div class="stat-number">{{ getDaysSinceVisit(patient.lastVisit) }}</div>
-            <div class="stat-text">Days Ago</div>
-          </div>
-        </div>
+        <!-- <div class="patient-stats"> -->
+        <!-- <div class="patient-stat"> -->
+        <!-- <div class="stat-number">{{ patient.totalVisits }}</div> -->
+        <!-- <div class="stat-text">Visits</div> -->
+        <!-- </div> -->
+        <!-- <div class="patient-stat"> -->
+        <!-- <div class="stat-number">{{ patient.activeTreatments }}</div> -->
+        <!-- <div class="stat-text">Active</div> -->
+        <!-- </div> -->
+        <!-- <div class="patient-stat"> -->
+        <!-- <div class="stat-number">{{ getDaysSinceVisit(patient.lastVisit) }}</div> -->
+        <!-- <div class="stat-text">Days Ago</div> -->
+        <!-- </div> -->
+        <!-- </div> -->
 
         <div style="color: #718096; font-size: 0.9rem; margin-bottom: 1rem">
-          📞 {{ patient.phone }}<br />
+          📞 {{ patient.contactNumber }}<br />
           📧 {{ patient.email }}
         </div>
 
@@ -190,8 +185,8 @@
           <button class="btn btn-primary btn-sm" (click)="viewProfile(patient)" style="flex: 1">
             View Profile
           </button>
-          <button class="btn btn-success btn-sm" (click)="bookAppointment(patient)">📅</button>
-          <button class="btn btn-secondary btn-sm" (click)="sendMessage(patient)">💬</button>
+          <!-- <button class="btn btn-success btn-sm" (click)="bookAppointment(patient)">📅</button> -->
+          <!-- <button class="btn btn-secondary btn-sm" (click)="sendMessage(patient)">💬</button> -->
         </div>
       </div>
       }
@@ -204,9 +199,9 @@
             <th>Patient</th>
             <th>Age</th>
             <th>Gender</th>
-            <th>Phone</th>
-            <th>Last Visit</th>
-            <th>Total Visits</th>
+            <th>Contact Number</th>
+            <!-- <th>Last Visit</th> -->
+            <!-- <th>Total Visits</th> -->
             <th>Actions</th>
           </tr>
         </thead>
@@ -234,15 +229,15 @@
             </td>
             <td>{{ patient.age }}</td>
             <td>{{ patient.gender }}</td>
-            <td>{{ patient.phone }}</td>
-            <td>{{ formatVisitDate(patient.lastVisit) }}</td>
-            <td>{{ patient.totalVisits }}</td>
+            <td>{{ patient.contactNumber }}</td>
+            <!-- <td>{{ formatVisitDate(patient.lastVisit) }}</td> -->
+            <!-- <td>{{ patient.totalVisits }}</td> -->
             <td>
               <div style="display: flex; gap: 0.5rem">
                 <button class="btn btn-primary btn-sm" (click)="viewProfile(patient)">View</button>
-                <button class="btn btn-success btn-sm" (click)="bookAppointment(patient)">
+                <!-- <button class="btn btn-success btn-sm" (click)="bookAppointment(patient)">
                   Book
-                </button>
+                </button> -->
               </div>
             </td>
           </tr>
@@ -267,19 +262,18 @@
           <div class="profile-details">
             <h2 class="profile-name">{{ selectedPatient.name }}</h2>
             <div class="profile-meta">
-              {{ selectedPatient.age }} years • {{ selectedPatient.gender }} • Patient since
-              {{ formatVisitDate(selectedPatient.registrationDate) }}
+              {{ selectedPatient.age }} years • {{ selectedPatient.gender }}
             </div>
             <div style="display: flex; gap: 0.5rem; margin-top: 1rem">
-              <button class="btn btn-success btn-sm" (click)="bookAppointment(selectedPatient)">
+              <!-- <button class="btn btn-success btn-sm" (click)="bookAppointment(selectedPatient)">
                 📅 Book Appointment
-              </button>
-              <button class="btn btn-primary btn-sm" (click)="viewMedicalRecords(selectedPatient)">
+              </button> -->
+              <!-- <button class="btn btn-primary btn-sm" (click)="viewMedicalRecords(selectedPatient)">
                 📋 Medical Records
-              </button>
-              <button class="btn btn-secondary btn-sm" (click)="sendMessage(selectedPatient)">
+              </button> -->
+              <!-- <button class="btn btn-secondary btn-sm" (click)="sendMessage(selectedPatient)">
                 💬 Message
-              </button>
+              </button> -->
             </div>
           </div>
         </div>
@@ -287,8 +281,8 @@
         <h3 class="section-title">Contact Information</h3>
         <div class="info-grid">
           <div class="info-item">
-            <div class="info-label">Phone</div>
-            <div class="info-value">{{ selectedPatient.phone }}</div>
+            <div class="info-label">Contact Number</div>
+            <div class="info-value">{{ selectedPatient.contactNumber }}</div>
           </div>
           <div class="info-item">
             <div class="info-label">Email</div>
@@ -304,7 +298,7 @@
           </div>
         </div>
 
-        <h3 class="section-title">Health Statistics</h3>
+        <!-- <h3 class="section-title">Health Statistics</h3>
         <div class="info-grid">
           <div class="info-item">
             <div class="info-label">Total Visits</div>
@@ -322,18 +316,16 @@
             <div class="info-label">Registration Date</div>
             <div class="info-value">{{ formatVisitDate(selectedPatient.registrationDate) }}</div>
           </div>
-        </div>
+        </div> -->
 
         <h3 class="section-title">Medical History</h3>
-        <div class="timeline">
-          <div *ngFor="let record of selectedPatient.medicalHistory" class="timeline-item">
-            <div class="timeline-content">
-              <div class="timeline-date">
-                {{ formatVisitDate(record.date) }} • {{ record.type }}
-              </div>
-              <div class="timeline-text">{{ record.notes }}</div>
-            </div>
-          </div>
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+          <p class="text-gray-600 mb-3">
+            View the patient's comprehensive medical history by clicking the button below.
+          </p>
+          <button class="btn btn-primary btn-sm" (click)="viewMedicalRecords(selectedPatient)">
+            📋 View Full Medical Records
+          </button>
         </div>
       </div>
     </div>

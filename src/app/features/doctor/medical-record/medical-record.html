@@ -1,6 +1,6 @@
 <div class="flex min-h-screen">
   <!-- Doctor Sidebar (similar to your appointments page) -->
-  <aside class="w-64 bg-white shadow-lg fixed h-full overflow-y-auto">
+  <aside class="fixed overflow-y-auto w-64 bg-white shadow-lg p-6 shrink-0 h-[90%]">
     <div class="px-6 py-8 border-b border-gray-200">
       <div class="text-2xl font-bold text-blue-600 flex items-center gap-2">⚕ MediCare</div>
     </div>
@@ -26,18 +26,19 @@
           >👥 Patients</a
         >
       </li>
-      <li>
-        <a
-          [routerLink]="['/doctor/medical-records']"
-          class="flex items-center gap-3 px-6 py-3 font-medium text-blue-600 bg-blue-50 border-l-4 border-blue-600"
-          >📋 Medical Records</a
-        >
-      </li>
+
       <li>
         <a
           [routerLink]="['/doctor/availability']"
           class="flex items-center gap-3 px-6 py-3 font-medium text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:border-l-4 hover:border-blue-600 transition"
           >⏰ Availability</a
+        >
+      </li>
+      <li>
+        <a
+          [routerLink]="['/doctor/medical-records']"
+          class="flex items-center gap-3 px-6 py-3 font-medium text-blue-600 bg-blue-50 border-l-4 border-blue-600"
+          >📋 Medical Records</a
         >
       </li>
 
@@ -248,8 +249,8 @@
 
 <!-- Medical Record Details Modal (Same as patient version but adapted for doctor) -->
 @if (showRecordModal && selectedRecord) {
-<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+<div class="fixed inset-0 backdrop-blur-xs bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
     <div class="p-6 border-b border-gray-200">
       <div class="flex justify-between items-center">
         <h3 class="text-xl font-semibold text-gray-800">Consultation Details</h3>

@@ -11,6 +11,7 @@ import { DoctorResponseDTO } from '../../../models/doctor-interface.js';
 import { DoctorService } from '../../../core/services/doctor-service.js';
 import { DoctorNotificationService } from '../../../core/services/doctor-notification-service';
 import { Sidebar } from '@shared/doctor/sidebar/sidebar';
+import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-doctor-dashboard',
@@ -125,20 +126,32 @@ export class DoctorDashboard implements OnInit {
     });
   }
 
+  // In your component class
+
   confirmAppointment(appointmentId: number): void {
+    // --- 1. Native Confirmation (If still used) ---
     if (!confirm('Are you sure you want to confirm this appointment?')) {
       return;
     }
+    // ------------------------------------------------
 
     this.appointmentService.confirmAppointment(appointmentId).subscribe({
       next: () => {
-        alert('Appointment confirmed successfully!');
+        toast.success(`Appointment Confirmed 🎉`, {
+          description: `The appointment has been successfully confirmed.`,
+        });
+
         this.fetchTodayAppointments(); // Refresh the list
         this.fetchAppointmentCount(); // Update count
       },
       error: (err: any) => {
         console.error('Failed to confirm appointment:', err);
-        alert('Failed to confirm appointment. Please try again.');
+
+        const errorMessage = err.error?.message || 'Server error. Check logs.';
+
+        toast.error('Confirmation Failed ❌', {
+          description: `Could not confirm appointment: ${errorMessage}`,
+        });
       },
     });
   }

@@ -18,7 +18,6 @@ export interface Doctor {
   contactNumber: string;
   qualification: string;
   clinicAddress: string;
-  licenseNumber?: string;
   status: 'ACTIVE' | 'INACTIVE' | 'PENDING';
   createdAt: string;
   userId?: string; // Changed to string for UUID

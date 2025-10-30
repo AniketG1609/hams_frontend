@@ -1,7 +1,7 @@
 <body class="font-sans bg-gray-100 text-gray-800">
   <div class="flex min-h-screen">
     <!-- Sidebar -->
-    <aside class="w-64 bg-white shadow-lg fixed h-full overflow-y-auto">
+    <aside class="fixed overflow-y-auto w-64 bg-white shadow-lg p-6 shrink-0 h-[90%]">
       <div class="px-6 py-8 border-b border-gray-200">
         <div class="text-2xl font-bold text-blue-600 flex items-center gap-2">⚕ MediCare</div>
       </div>
@@ -45,7 +45,7 @@
         <li>
           <button
             (click)="logout()"
-            class="flex items-center gap-3 px-6 py-3 font-medium text-red-600 hover:bg-gray-100 hover:border-l-4 hover:border-red-600 rounded-l w-full text-left"
+            class="flex items-center gap-3 px-6 py- font-medium text-red-600 hover:bg-gray-100 hover:border-l-4 hover:border-red-600 rounded-l w-full text-left"
           >
             🚪 Logout
           </button>
@@ -268,12 +268,12 @@
                 Cancel
               </button>
               } @else if (appointment.status === 'COMPLETED') {
-              <button
+              <!-- <button
                 (click)="viewNotes('No notes available')"
                 class="bg-gray-200 text-gray-700 px-3 py-1 text-sm rounded hover:bg-gray-300 transition"
               >
                 View Notes
-              </button>
+              </button> -->
               }
             </div>
           </div>

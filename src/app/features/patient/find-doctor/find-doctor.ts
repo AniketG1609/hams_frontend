@@ -199,7 +199,7 @@ export class FindDoctorComponent implements OnInit {
           console.error('Error booking appointment:', error);
 
           // --- ERROR TOAST ---
-          const errorMessage = error.error?.message || 'Server error occurred.';
+          const errorMessage = error.error?.message || 'Slot already booked.';
           toast.error('Booking Failed ❌', {
             description: `Failed to book appointment: ${errorMessage} Please try again.`,
           });

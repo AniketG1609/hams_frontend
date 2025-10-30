@@ -1,7 +1,7 @@
 <div id="doctor-dashboard" class="flex min-h-screen bg-gray-100">
   <app-sidebar [doctor]="doctor"></app-sidebar>
 
-  <main class="flex-1 p-8 overflow-y-auto">
+  <main class="flex-1 p-8 overflow-y-auto ml-64">
     <app-doctor-header
       [doctor]="doctor"
       [notificationCount]="stats.notifications"
@@ -117,15 +117,16 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-wrap gap-2 mt-4">
-          @if (appointment.status === 'CONFIRMED' || 'PENDING') {
+          <!-- @if (appointment.status === 'CONFIRMED' || 'PENDING') {
           <button
             (click)="viewAppointmentDetails(appointment)"
             class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition font-medium"
           >
-            👁️ View Details
+            View Details
           </button>
 
-          } @if (appointment.status === 'PENDING') {
+          }  -->
+          @if (appointment.status === 'PENDING') {
           <button
             (click)="confirmAppointment(appointment.appointmentId)"
             class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition font-medium"

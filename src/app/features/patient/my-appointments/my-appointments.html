@@ -1,8 +1,8 @@
 <div class="flex min-h-screen">
-  <app-sidebar></app-sidebar>
+  <app-sidebar [patient]="patient"></app-sidebar>
 
   <!-- Main Content -->
-  <main class="flex-1 p-8 bg-gray-100 overflow-y-auto">
+  <main class="flex-1 p-8 bg-gray-100 overflow-y-auto ml-64">
     <app-header [patient]="patient"></app-header>
 
     <div class="bg-white p-6 rounded-xl shadow">
@@ -56,7 +56,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <span>💰</span>
-                  <!-- <span>${{ appointment.doctor.consultationFee }}</span> -->
+                  <span>${{ 100 }}</span>
                 </div>
               </div>
 
@@ -96,14 +96,15 @@
             >
               Cancel
             </button>
-            } @if (canRescheduleAppointment(appointment.status)) {
+            }
+            <!-- @if (canRescheduleAppointment(appointment.status)) {
             <button
               (click)="openRescheduleModal(appointment)"
               class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 transition text-sm"
             >
               Reschedule
             </button>
-            }
+            } -->
           </div>
         </div>
         } @if (filteredAppointments.length === 0) {

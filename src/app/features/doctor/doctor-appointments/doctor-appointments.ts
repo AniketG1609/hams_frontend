@@ -1,5 +1,4 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -14,7 +13,7 @@ import { toast } from 'ngx-sonner';
   selector: 'app-doctor-appointments',
   standalone: true,
   templateUrl: './doctor-appointments.html',
-  imports: [FormsModule, CommonModule, HttpClientModule, RouterLink],
+  imports: [FormsModule, CommonModule, RouterLink],
 })
 export class DoctorAppointments implements OnInit {
   private appointmentService = inject(AppointmentService);

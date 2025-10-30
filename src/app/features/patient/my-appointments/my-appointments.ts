@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Header } from '../../../shared/patient/header/header';
-import { AppointmentResponseDTO } from '../../../models/appointment-interface';
-import { Patient } from '../../../models/patient-interface';
+import { AppointmentResponseDTO, PatientResponseDTO } from '../../../models/appointment-interface';
 import { AppointmentService } from '../../../core/services/patient-appointment-service';
 import { PatientService } from '../../../core/services/patient-service';
 import { Sidebar } from '../../../shared/patient/sidebar/sidebar';
@@ -18,7 +17,7 @@ import { Sidebar } from '../../../shared/patient/sidebar/sidebar';
 export class MyAppointments implements OnInit {
   appointments: AppointmentResponseDTO[] = [];
   filteredAppointments: AppointmentResponseDTO[] = [];
-  patient: Patient | null = null;
+  patient: PatientResponseDTO | null = null;
   filterStatus: string = 'all';
 
   // Modal states
